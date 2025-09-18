@@ -56,6 +56,10 @@ return new class extends Migration {
             $table->string('password', 255);
             $table->enum('user_type', ['admin','mahasiswa','mitra']);
             $table->boolean('is_active')->default(true);
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
 
