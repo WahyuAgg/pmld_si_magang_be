@@ -60,18 +60,6 @@ return new class extends Migration {
         });
 
         // ======================
-        // Table: variabel_penilaian
-        // ======================
-        Schema::create('variabel_penilaian', function (Blueprint $table) {
-            $table->id('variabel_id');
-            $table->string('nama_variabel', 100);
-            $table->text('deskripsi')->nullable();
-            $table->integer('bobot')->default(1);
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('created_at')->useCurrent();
-        });
-
-        // ======================
         // Table: data_admin
         // ======================
         Schema::create('data_admin', function (Blueprint $table) {
@@ -154,7 +142,6 @@ return new class extends Migration {
         Schema::dropIfExists('supervisor_perusahaan');
         Schema::dropIfExists('mahasiswa');
         Schema::dropIfExists('data_admin');
-        Schema::dropIfExists('variabel_penilaian');
         Schema::dropIfExists('users');
         Schema::dropIfExists('tahun_ajaran');
         Schema::dropIfExists('perusahaan');
