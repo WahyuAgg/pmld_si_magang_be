@@ -3,8 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
-
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\MagangController;
@@ -69,6 +67,9 @@ Route::prefix('mahasiswa')
     Route::get('/{id}', 'show');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+
+    // Custom
+    Route::post('import/','import');
 });
 
 

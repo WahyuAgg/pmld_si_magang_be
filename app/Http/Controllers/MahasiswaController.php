@@ -5,9 +5,11 @@ use App\Models\Mahasiswa;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-
-
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+
 
 class MahasiswaController extends Controller
 {
@@ -157,4 +159,116 @@ class MahasiswaController extends Controller
             'message' => 'Mahasiswa berhasil dihapus'
         ], 200);
     }
+
+
+
+    // CUSTOM
+
+    public function import0(Request $request)
+    {
+        // Validasi file CSV
+        $request->validate([
+            'file' => 'required|mimes:csv,txt',
+        ]);
+
+        $file = $request->file('file');
+
+        // Buka file
+        $handle = fopen($file->getRealPath(), "r");
+
+        // Lewati header (NO;NIM;NAMA)
+        $header = fgetcsv($handle, 1000, ";");
+
+        $imported = [];
+        while (($row = fgetcsv($handle, 1000, ";")) !== false) {
+            [$no, $nim, $nama] = $row;
+
+            // Buat user baru atau skip jika sudah ada
+            $user = User::firstOrCreate(
+                ['username' => $nim],
+                [
+                    'name' => $nim, // atau $nama jika mau nama asli
+                    'email' => $nim . '@example.com', // kalau email wajib unik
+                    'password' => Hash::make($nama),
+                ]
+            );
+
+            $imported[] = $user;
+        }
+
+        fclose($handle);
+
+        return response()->json([
+            'message' => 'Import berhasil',
+            'data' => $imported,
+        ]);
+    }
+
+    public function import(Request $request)
+    {
+        // Validasi file CSV
+        $request->validate([
+            'file' => 'required|mimes:csv,txt',
+        ]);
+
+        $file = $request->file('file');
+
+        // Buka file
+        $handle = fopen($file->getRealPath(), "r");
+
+        // Lewati header (No;Nama;NIM)
+        $header = fgetcsv($handle, 1000, ";");
+
+        $imported = [];
+        while (($row = fgetcsv($handle, 1000, ";")) !== false) {
+            [$no, $nama, $nim] = $row;
+
+            // Pecah NIM jadi bagian-bagian
+            $nimParts  = explode("/", $nim);
+
+            // Pastikan format NIM sesuai (4 bagian)
+            if (count($nimParts ) !== 4) {
+                continue; // skip data kalau NIM format tidak sesuai
+            }
+
+            $angkatan = "20" . $nimParts [0]; // "23" -> "2023"
+            $niu = $nimParts [1];
+            $kodeFakultas = $nimParts [2];
+            $nif = $nimParts [3];
+
+            // Buat user baru atau skip jika sudah ada
+            $user = User::firstOrCreate(
+                // where
+                ['username' => $niu],
+                // data, if not found
+                [
+                    'name' => $nama, // nama asli
+                    'email' => $niu . '@example.com', // email dummy unik
+                    'password' => Hash::make($nif), // password dari bagian akhir
+                    'user_type' => "mahasiswa"
+                ]
+            );
+
+            $mahasiswa = Mahasiswa::firstOrCreate(
+                ['nim' => $nim],
+                [
+                    'user_id' => $user->user_id,
+                    'nama' => $nama,
+                    'angkatan' => $angkatan
+
+                ]
+
+            );
+
+            $imported[] = $user;
+        }
+
+        fclose($handle);
+
+        return response()->json([
+            'message' => 'Import berhasil',
+            'data' => $imported,
+        ]);
+    }
+
 }
