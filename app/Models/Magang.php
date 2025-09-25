@@ -45,6 +45,6 @@ class Magang extends Model
 
     public function tahunAjaran()
     {
-        return $this->belongsTo(Ta::class, 'tahun_ajaran_id', 'tahun_ajaran_id');
+        return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_id', 'tahun_ajaran_id');
     }
 }
