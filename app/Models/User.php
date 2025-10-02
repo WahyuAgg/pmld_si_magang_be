@@ -13,14 +13,14 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $primaryKey = 'user_id'; 
+    protected $primaryKey = 'user_id';
 
     protected $fillable = [
         'name',
         'email',
         'username',
         'password',
-        'user_type',
+        'user_type', // constraint tyep: admin, mahasiswa, supervisor, dosbing
         'is_active',
     ];
 

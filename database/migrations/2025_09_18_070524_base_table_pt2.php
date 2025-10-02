@@ -21,19 +21,6 @@ return new class extends Migration {
             $table->primary(['penilaian_id', 'supervisor_id']);
         });
 
-        // ======================
-        // Table: progress_magang
-        // ======================
-        Schema::create('progress_magang', function (Blueprint $table) {
-            $table->id('progress_id');
-            $table->unsignedBigInteger('magang_id');
-            $table->enum('tahap', ['informasi_magang', 'dokumen_pra_magang', 'logbook', 'laporan_akhir', 'presentasi', 'selesai']);
-            $table->enum('status', ['belum_mulai', 'dalam_proses', 'selesai'])->default('belum_mulai');
-            $table->integer('persentase')->default(0);
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-
-            $table->unique(['magang_id', 'tahap']);
-        });
 
         // ======================
         // Table: dokumen_magang
