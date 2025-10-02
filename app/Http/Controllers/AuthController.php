@@ -10,14 +10,14 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        // Validasi input: gunakan username & password
+        // Validasi input: gunakan email & password
         $request->validate([
-            'username' => 'required|string',
+            'email' => 'required|string',
             'password' => 'required|string',
         ]);
 
         // Coba login dengan username
-        if (!Auth::attempt($request->only('username', 'password'))) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
