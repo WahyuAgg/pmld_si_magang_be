@@ -15,8 +15,9 @@ class Magang extends Model
     protected $fillable = [
         'mahasiswa_id',
         'perusahaan_id',
+        'supervisor_id',
         'dosbing_id',
-        'tahun_ajaran_id',
+        'tahun_ajaran',
         'semester_magang',
         'jumlah_magang_ke',
         'role_magang',
@@ -26,6 +27,16 @@ class Magang extends Model
         'periode_bulan',
         'status_magang',
     ];
+
+    // ✅ Tambahkan ini
+    protected static function booted()
+    {
+        static::saving(function ($magang) {
+            if (!in_array($magang->semester_magang, [6, 7])) {
+                throw new \InvalidArgumentException('Semester magang hanya boleh 6 atau 7.');
+            }
+        });
+    }
 
     // 🔗 Relasi
     public function mahasiswa()
@@ -38,13 +49,13 @@ class Magang extends Model
         return $this->belongsTo(Mitra::class, 'perusahaan_id', 'perusahaan_id');
     }
 
+    public function supervisor()
+    {
+        return $this->belongsTo(Supervisor::class, 'supervisor_id', 'supervisor_id');
+    }
+
     public function dosenPembimbing()
     {
         return $this->belongsTo(Dosbing::class, 'dosbing_id', 'dosbing_id');
-    }
-
-    public function tahunAjaran()
-    {
-        return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_id', 'tahun_ajaran_id');
     }
 }

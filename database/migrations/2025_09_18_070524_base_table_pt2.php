@@ -28,7 +28,7 @@ return new class extends Migration {
         Schema::create('dokumen_magang', function (Blueprint $table) {
             $table->unsignedBigInteger('dokumen_id')->autoIncrement();
             $table->unsignedBigInteger('magang_id');
-            $table->enum('jenis_dokumen', ['surat_penerimaan', 'pra_krs', 'laporan_magang']);
+            $table->enum('jenis_dokumen', ['surat_penerimaan', 'pra_krs', 'laporan_magang', 'doc_penilaian_mitra']);
             $table->string('nama_file', 255);
             $table->string('path_file', 500);
             $table->bigInteger('ukuran_file')->nullable();

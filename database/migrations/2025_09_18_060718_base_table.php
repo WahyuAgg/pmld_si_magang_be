@@ -36,16 +36,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ======================
-        // Table: tahun_ajaran
-        // ======================
-        Schema::create('tahun_ajaran', function (Blueprint $table) {
-            $table->id('tahun_ajaran_id');
-            $table->string('nama_tahun_ajaran', 20);
-            $table->enum('semester', ['ganjil','genap']);
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('created_at')->useCurrent();
-        });
 
         // ======================
         // Table: users
@@ -118,8 +108,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('magang_id')->autoIncrement();
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('perusahaan_id');
+            $table->unsignedBigInteger('supervisor_id');
             $table->unsignedBigInteger('dosbing_id');
-            $table->unsignedBigInteger('tahun_ajaran_id');
+            $table->year('tahun_ajaran');
             $table->integer('semester_magang');
             $table->integer('jumlah_magang_ke')->default(1);
             $table->string('role_magang', 100)->nullable();
@@ -130,14 +121,15 @@ return new class extends Migration {
             $table->enum('status_magang', ['draft','berlangsung','selesai','ditolak'])->default('draft');
             $table->timestamps();
 
-            $table->primary(['magang_id','mahasiswa_id','perusahaan_id','dosbing_id','tahun_ajaran_id']);
+            $table->primary(['magang_id','mahasiswa_id','perusahaan_id','dosbing_id']);
+            
             $table->foreign('mahasiswa_id')->references('mahasiswa_id')->on('mahasiswa');
             $table->foreign('perusahaan_id')->references('perusahaan_id')->on('perusahaan');
             $table->foreign('dosbing_id')->references('dosbing_id')->on('dosen_pembimbing');
-            $table->foreign('tahun_ajaran_id')->references('tahun_ajaran_id')->on('tahun_ajaran');
+            $table->foreign('supervisor_id')->references('supervisor_id')->on('supervisor_perusahaan');
+
         });
 
-        // 🚨 lanjutkan untuk penilaian_mitra, progress_magang, dokumen_magang, dll.
     }
 
     public function down(): void
@@ -147,7 +139,6 @@ return new class extends Migration {
         Schema::dropIfExists('mahasiswa');
         Schema::dropIfExists('data_admin');
         Schema::dropIfExists('users');
-        Schema::dropIfExists('tahun_ajaran');
         Schema::dropIfExists('perusahaan');
         Schema::dropIfExists('dosen_pembimbing');
     }
