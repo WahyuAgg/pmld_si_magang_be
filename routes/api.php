@@ -233,21 +233,7 @@ Route::prefix('penilaian-mitra')
         Route::delete('/{id}', 'destroy');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Progress Magang Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('progress-magang')
-    ->middleware([])
-    ->controller(ProgressMagangController::class)
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -265,21 +251,4 @@ Route::prefix('supervisor')
         Route::delete('/{id}', 'destroy');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Tahun Ajaran Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('tahun-ajaran')
-    ->middleware([])
-    ->controller(TahunAjaranController::class)
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
 
-        // Custom route tambahan
-        Route::get('/aktif', 'aktif');
-    });
