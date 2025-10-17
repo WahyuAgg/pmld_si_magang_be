@@ -65,6 +65,7 @@ class MagangController extends Controller
             'mahasiswa_id' => ['required', 'exists:mahasiswa,mahasiswa_id'],
             'mitra_id' => ['required', 'exists:mitra,mitra_id'],
             'dosbing_id' => ['nullable'],
+            'supervisor_id' => ['nullable', 'exists:supervisor,supervisor_id'],
             'tahun_ajaran' => ['required'],
             'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
             'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
