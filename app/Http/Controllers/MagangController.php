@@ -64,7 +64,7 @@ class MagangController extends Controller
         $rules = [
             'mahasiswa_id' => ['required', 'exists:mahasiswa,mahasiswa_id'],
             'mitra_id' => ['required', 'exists:mitra,mitra_id'],
-            'dosbing_id' => ['nullable', 'exists:dosbing,dosbing_id'],
+            'dosbing_id' => ['nullable'],
             'tahun_ajaran' => ['required'],
             'semester_magang' => ['required', 'string', 'max:20'],
             'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
