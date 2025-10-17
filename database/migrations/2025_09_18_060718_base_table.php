@@ -9,6 +9,21 @@ return new class extends Migration {
     public function up(): void
     {
         // ======================
+        // Table: users
+        // ======================
+        Schema::create('users', function (Blueprint $table) {
+            $table->id('user_id');
+            $table->string('username', 50)->unique();
+            $table->string('password', 255);
+            $table->enum('role', ['admin','mahasiswa','supervisor', 'dosbing']);
+            $table->boolean('is_active')->default(true);
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        // ======================
         // Table: dosen_pembimbing
         // ======================
         Schema::create('dosen_pembimbing', function (Blueprint $table) {
@@ -22,11 +37,11 @@ return new class extends Migration {
         });
 
         // ======================
-        // Table: perusahaan
+        // Table: mitra
         // ======================
-        Schema::create('perusahaan', function (Blueprint $table) {
-            $table->id('perusahaan_id');
-            $table->string('nama_perusahaan', 150);
+        Schema::create('mitra', function (Blueprint $table) {
+            $table->id('mitra_id');
+            $table->string('nama_mitra', 150);
             $table->text('alamat')->nullable();
             $table->string('no_telp', 15)->nullable();
             $table->string('email', 100)->nullable();
@@ -37,30 +52,8 @@ return new class extends Migration {
         });
 
 
-        // ======================
-        // Table: users
-        // ======================
-        Schema::create('users', function (Blueprint $table) {
-            $table->id('user_id');
-            $table->string('username', 50)->unique();
-            $table->string('password', 255);
-            $table->enum('user_type', ['admin','mahasiswa','mitra']);
-            $table->boolean('is_active')->default(true);
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
-            $table->timestamps();
-        });
 
-        // ======================
-        // Table: data_admin
-        // ======================
-        Schema::create('data_admin', function (Blueprint $table) {
-            $table->id('admin_id');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('user_id')->on('users');
-        });
+
 
         // ======================
         // Table: mahasiswa
@@ -80,25 +73,26 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->primary(['mahasiswa_id','user_id']);
+
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
 
         // ======================
-        // Table: supervisor_perusahaan
+        // Table: supervisor
         // ======================
-        Schema::create('supervisor_perusahaan', function (Blueprint $table) {
+        Schema::create('supervisor', function (Blueprint $table) {
             $table->unsignedBigInteger('supervisor_id')->autoIncrement();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('perusahaan_id');
+            $table->unsignedBigInteger('mitra_id');
             $table->string('nama_supervisor', 100);
             $table->string('jabatan', 100)->nullable();
             $table->string('email', 100)->nullable();
             $table->string('no_hp', 15)->nullable();
             $table->timestamps();
 
-            $table->primary(['supervisor_id','perusahaan_id']);
+            $table->primary(['supervisor_id','mitra_id']);
             $table->foreign('user_id')->references('user_id')->on('users')->nullOnDelete();
-            $table->foreign('perusahaan_id')->references('perusahaan_id')->on('perusahaan');
+            $table->foreign('mitra_id')->references('mitra_id')->on('mitra');
         });
 
         // ======================
@@ -107,7 +101,7 @@ return new class extends Migration {
         Schema::create('magang', function (Blueprint $table) {
             $table->unsignedBigInteger('magang_id')->autoIncrement();
             $table->unsignedBigInteger('mahasiswa_id');
-            $table->unsignedBigInteger('perusahaan_id');
+            $table->unsignedBigInteger('mitra_id');
             $table->unsignedBigInteger('supervisor_id');
             $table->unsignedBigInteger('dosbing_id');
             $table->year('tahun_ajaran');
@@ -121,12 +115,12 @@ return new class extends Migration {
             $table->enum('status_magang', ['draft','berlangsung','selesai','ditolak'])->default('draft');
             $table->timestamps();
 
-            $table->primary(['magang_id','mahasiswa_id','perusahaan_id','dosbing_id']);
-            
+            $table->primary(['magang_id','mahasiswa_id','mitra_id','dosbing_id']);
+
             $table->foreign('mahasiswa_id')->references('mahasiswa_id')->on('mahasiswa');
-            $table->foreign('perusahaan_id')->references('perusahaan_id')->on('perusahaan');
+            $table->foreign('mitra_id')->references('mitra_id')->on('mitra');
             $table->foreign('dosbing_id')->references('dosbing_id')->on('dosen_pembimbing');
-            $table->foreign('supervisor_id')->references('supervisor_id')->on('supervisor_perusahaan');
+            $table->foreign('supervisor_id')->references('supervisor_id')->on('supervisor');
 
         });
 
@@ -135,11 +129,11 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('magang');
-        Schema::dropIfExists('supervisor_perusahaan');
+        Schema::dropIfExists('supervisor');
         Schema::dropIfExists('mahasiswa');
         Schema::dropIfExists('data_admin');
         Schema::dropIfExists('users');
-        Schema::dropIfExists('perusahaan');
+        Schema::dropIfExists('mitra');
         Schema::dropIfExists('dosen_pembimbing');
     }
 };

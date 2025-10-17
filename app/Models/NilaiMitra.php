@@ -22,7 +22,7 @@ class NilaiMitra extends Model
         return $this->belongsTo(Magang::class, 'magang_id', 'magang_id');
     }
 
-    // Relasi: PenilaianMitra belongsTo SupervisorPerusahaan
+    // Relasi: PenilaianMitra belongsTo Supervisormitra
     public function supervisor()
     {
         return $this->belongsTo(Supervisor::class, 'supervisor_id', 'supervisor_id');

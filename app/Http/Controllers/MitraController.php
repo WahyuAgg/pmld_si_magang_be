@@ -17,10 +17,10 @@ class MitraController extends Controller
     {
         $query = Mitra::with(['supervisor', 'magang']);
 
-        // Pencarian: nama_perusahaan atau bidang_usaha
+        // Pencarian: nama_mitra atau bidang_usaha
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama_perusahaan', 'like', "%{$search}%")
+                $q->where('nama_mitra', 'like', "%{$search}%")
                   ->orWhere('bidang_usaha', 'like', "%{$search}%");
             });
         }
@@ -31,13 +31,13 @@ class MitraController extends Controller
         }
 
         $perPage = (int) $request->query('per_page', 15);
-        $mitra = $query->orderBy('nama_perusahaan')->paginate($perPage);
+        $mitra = $query->orderBy('nama_mitra')->paginate($perPage);
 
         return response()->json($mitra, 200);
     }
 
     /**
-     * Tampilkan detail mitra berdasarkan id (perusahaan_id).
+     * Tampilkan detail mitra berdasarkan id (mitra_id).
      */
     public function show($id)
     {
@@ -52,7 +52,7 @@ class MitraController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'nama_perusahaan' => ['required', 'string', 'max:255', 'unique:perusahaan,nama_perusahaan'],
+            'nama_mitra' => ['required', 'string', 'max:255', 'unique:mitra,nama_mitra'],
             'alamat' => ['nullable', 'string'],
             'no_telp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
@@ -88,9 +88,9 @@ class MitraController extends Controller
         $mitra = Mitra::findOrFail($id);
 
         $rules = [
-            'nama_perusahaan' => [
+            'nama_mitra' => [
                 'required', 'string', 'max:255',
-                Rule::unique('perusahaan', 'nama_perusahaan')->ignore($mitra->perusahaan_id, 'perusahaan_id')
+                Rule::unique('mitra', 'nama_mitra')->ignore($mitra->mitra_id, 'mitra_id')
             ],
             'alamat' => ['nullable', 'string'],
             'no_telp' => ['nullable', 'string', 'max:30'],

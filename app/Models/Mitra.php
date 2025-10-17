@@ -9,11 +9,11 @@ class Mitra extends Model
 {
     use HasFactory;
 
-    protected $table = 'perusahaan';
+    protected $table = 'mitra';
     protected $primaryKey = 'perusahaan_id';
 
     protected $fillable = [
-        'nama_perusahaan',
+        'nama_mitra',
         'alamat',
         'no_telp',
         'email',
@@ -25,11 +25,11 @@ class Mitra extends Model
     // 🔗 Relasi
     public function supervisor()
     {
-        return $this->hasMany(Supervisor::class, 'perusahaan_id', 'perusahaan_id');
+        return $this->hasMany(Supervisor::class, 'mitra_id', 'mitra_id');
     }
 
     public function magang()
     {
-        return $this->hasMany(Magang::class, 'perusahaan_id', 'perusahaan_id');
+        return $this->hasMany(Magang::class, 'mitra_id', 'mitra_id');
     }
 }

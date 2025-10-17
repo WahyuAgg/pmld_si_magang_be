@@ -22,7 +22,7 @@ class MahasiswaSeeder extends Seeder
                     'email' => "mhs{$angkatan}{$i}@example.com",
                     'username' => "mhs{$angkatan}{$i}",
                     'password' => Hash::make('password123'),
-                    'user_type' => 'mahasiswa',
+                    'role' => 'mahasiswa',
                     'is_active' => true,
                 ]);
 

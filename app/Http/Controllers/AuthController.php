@@ -8,16 +8,54 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+
+    public function register(Request $request)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6|confirmed', // password_confirmation wajib dikirim
+            'role' => 'required|string'
+        ]);
+
+        // Buat user baru
+        $user = \App\Models\User::create([
+            'name' => $validatedData['name'],
+            'username' => $validatedData['username'],
+            'email' => $validatedData['email'],
+            'password' => bcrypt($validatedData['password']),
+            'role' => $validatedData['role']
+        ]);
+
+        // Buat token langsung setelah register
+        $token = $user->createToken('api-token')->plainTextToken;
+        $token_expired = \Carbon\Carbon::now()->addHours(2);
+
+        $user->tokens->last()->update([
+            'expires_at' => $token_expired,
+        ]);
+
+        return response()->json([
+            'message' => 'User registered successfully.',
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'expires_at' => $token_expired,
+        ], 201);
+    }
+
     public function login(Request $request)
     {
-        // Validasi input: gunakan email & password
+        // Validasi input: gunakan username & password
         $request->validate([
-            'email' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
         // Coba login dengan username
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 

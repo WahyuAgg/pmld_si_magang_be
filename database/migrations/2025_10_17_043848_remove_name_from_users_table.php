@@ -8,14 +8,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'mahasiswa', 'supervisor', 'dosbing'])->change();
+            if (Schema::hasColumn('users', 'name')) {
+                $table->dropColumn('name');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'mahasiswa', 'mitra'])->change();
+            $table->string('name')->nullable();
         });
     }
 };

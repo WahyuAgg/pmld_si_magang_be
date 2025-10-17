@@ -19,7 +19,7 @@ class MagangSeeder extends Seeder
             // ===== Magang ke-1 (semester 6) =====
             Magang::create([
                 'mahasiswa_id' => $mhs->mahasiswa_id,
-                'perusahaan_id' => rand(1, 16), // random mitra id
+                'mitra_id' => rand(1, 16), // random mitra id
                 'dosbing_id' => rand(1, 20), // random dosbing id
                 'supervisor_id' => rand(1, 32), // random dosbing id
                 'tahun_ajaran' => $tahunAjaran,
@@ -36,7 +36,7 @@ class MagangSeeder extends Seeder
             // ===== Magang ke-2 (semester 7) =====
             Magang::create([
                 'mahasiswa_id' => $mhs->mahasiswa_id,
-                'perusahaan_id' => rand(1, 16), // random mitra id
+                'mitra_id' => rand(1, 16), // random mitra id
                 'dosbing_id' => rand(1, 20), // random dosbing id
                 'supervisor_id' => rand(1, 32), // random dosbing id
                 'tahun_ajaran' => $tahunAjaran,

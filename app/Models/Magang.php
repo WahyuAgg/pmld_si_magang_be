@@ -14,7 +14,7 @@ class Magang extends Model
 
     protected $fillable = [
         'mahasiswa_id',
-        'perusahaan_id',
+        'mitra_id',
         'supervisor_id',
         'dosbing_id',
         'tahun_ajaran',
@@ -44,9 +44,9 @@ class Magang extends Model
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id', 'mahasiswa_id');
     }
 
-    public function perusahaan()
+    public function mitra()
     {
-        return $this->belongsTo(Mitra::class, 'perusahaan_id', 'perusahaan_id');
+        return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
     }
 
     public function supervisor()

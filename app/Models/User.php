@@ -16,11 +16,10 @@ class User extends Authenticatable
     protected $primaryKey = 'user_id';
 
     protected $fillable = [
-        'name',
         'email',
         'username',
         'password',
-        'user_type', // constraint tyep: admin, mahasiswa, supervisor, dosbing
+        'role', // constraint roles: admin, mahasiswa, supervisor, dosbing
         'is_active',
     ];
 

@@ -16,8 +16,8 @@ class AdminSeeder extends Seeder
             'name' => 'Admin User',
             'username' => 'admin', // ✅ WAJIB ada
             'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-            'user_type' => 'admin',
+            'password' => bcrypt('password123'),
+            'role' => 'admin',
             'is_active' => true,
         ]);
 

@@ -13,12 +13,13 @@ return new class extends Migration {
         Schema::create('penilaian_mitra', function (Blueprint $table) {
             $table->unsignedBigInteger('penilaian_id')->autoIncrement();
             $table->unsignedBigInteger('magang_id');
-            $table->unsignedBigInteger('supervisor_id');
             $table->decimal('nilai', 5, 2);
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
-            $table->primary(['penilaian_id', 'supervisor_id']);
+            $table->primary(['penilaian_id']);
+
+            $table->foreign('magang_id')->references('magang_id')->on('magang');
         });
 
 
@@ -38,6 +39,9 @@ return new class extends Migration {
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->primary(['dokumen_id', 'magang_id']);
+
+            $table->foreign('magang_id')->references('magang_id')->on('magang');
+
         });
 
         // ======================
@@ -46,14 +50,16 @@ return new class extends Migration {
         Schema::create('dokumen_penilaian_mitra', function (Blueprint $table) {
             $table->unsignedBigInteger('dokumen_penilaian_id')->autoIncrement();
             $table->unsignedBigInteger('magang_id');
-            $table->unsignedBigInteger('supervisor_id');
             $table->string('nama_file', 255);
             $table->string('path_file', 500);
             $table->string('jenis_dokumen', 100)->nullable();
             $table->text('keterangan')->nullable();
             $table->timestamp('uploaded_at')->useCurrent();
 
-            $table->primary(['dokumen_penilaian_id', 'magang_id', 'supervisor_id']);
+            $table->primary(['dokumen_penilaian_id', 'magang_id']);
+
+            $table->foreign('magang_id')->references('magang_id')->on('magang');
+
         });
 
         // ======================
@@ -73,12 +79,15 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->primary(['jadwal_id', 'magang_id']);
+
+            $table->foreign('magang_id')->references('magang_id')->on('magang');
+
         });
 
         // ======================
         // Table: logbook_magang
         // ======================
-        Schema::create('logbook_magang', function (Blueprint $table) {
+        Schema::create('logbook', function (Blueprint $table) {
             $table->unsignedBigInteger('logbook_id')->autoIncrement();
             $table->unsignedBigInteger('magang_id');
             $table->date('tanggal_kegiatan');
@@ -87,6 +96,9 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->primary(['logbook_id', 'magang_id']);
+
+            $table->foreign('magang_id')->references('magang_id')->on('magang');
+
         });
 
         // ======================
@@ -101,6 +113,8 @@ return new class extends Migration {
             $table->timestamp('uploaded_at')->useCurrent();
 
             $table->primary(['foto_id', 'logbook_id']);
+
+            $table->foreign('logbook_id')->references('logbook_id')->on('logbook');
         });
     }
 

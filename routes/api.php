@@ -14,9 +14,7 @@ use App\Http\Controllers\DosbingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FotoMagangController;
 use App\Http\Controllers\NilaiMitraController;
-use App\Http\Controllers\ProgressMagangController;
 use App\Http\Controllers\SupervisorController;
-use App\Http\Controllers\TahunAjaranController;
 
 
 
@@ -31,7 +29,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::prefix('user')
-    ->middleware([])
+    ->middleware(['auth:sanctum'])
     ->controller(MahasiswaController::class)->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
@@ -47,11 +45,17 @@ Route::prefix('user')
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')
-->middleware([])
 ->controller(AuthController::class)->group(function () {
-    Route::get('/login', 'login');
-    Route::post('/logout', 'logout');
-});
+    Route::post('/login', 'login');
+    Route::post('/register', 'register');
+
+    });
+
+Route::prefix('auth')
+    ->middleware(['auth:sanctum'])
+    ->controller(AuthController::class)->group(function () {
+        Route::post('/logout', 'logout');
+    });
 
 
 /*
@@ -60,12 +64,12 @@ Route::prefix('auth')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mahasiswa')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(MahasiswaController::class)->group(function () {
+    Route::post('/update', 'update');
     Route::get('/', 'index');
     Route::post('/', 'store');
     Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
 
     // Custom
@@ -79,7 +83,7 @@ Route::prefix('mahasiswa')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mitra')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(MitraController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -95,7 +99,7 @@ Route::prefix('mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('magang')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(MagangController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -111,7 +115,7 @@ Route::prefix('magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('logbook')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(LogbookController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -127,7 +131,7 @@ Route::prefix('logbook')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dokumen-magang')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(DokumenMagangController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -143,7 +147,7 @@ Route::prefix('dokumen-magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('jadwal-presentasi')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(JadwalPresentasiController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -159,7 +163,7 @@ Route::prefix('jadwal-presentasi')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dokumen-penilaian-mitra')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(DokumenNilaiMitraController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -175,7 +179,7 @@ Route::prefix('dokumen-penilaian-mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dosbing')
-->middleware([])
+->middleware(['auth:sanctum'])
 ->controller(DosbingController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -191,7 +195,7 @@ Route::prefix('dosbing')
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
-    ->middleware([])
+    ->middleware(['auth:sanctum'])
     ->controller(AdminController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -207,7 +211,7 @@ Route::prefix('admin')
 |--------------------------------------------------------------------------
 */
 Route::prefix('foto-magang')
-    ->middleware([])
+    ->middleware(['auth:sanctum'])
     ->controller(FotoMagangController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -223,7 +227,7 @@ Route::prefix('foto-magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('penilaian-mitra')
-    ->middleware([])
+    ->middleware(['auth:sanctum'])
     ->controller(NilaiMitraController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -241,7 +245,7 @@ Route::prefix('penilaian-mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('supervisor')
-    ->middleware([])
+    ->middleware(['auth:sanctum'])
     ->controller(SupervisorController::class)
     ->group(function () {
         Route::get('/', 'index');

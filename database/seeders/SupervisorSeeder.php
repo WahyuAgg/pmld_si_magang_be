@@ -22,18 +22,18 @@ class SupervisorSeeder extends Seeder
             for ($i = 1; $i <= 2; $i++) {
                 // Buat dulu akun user supervisor
                 $user = User::create([
-                    'name' => "Supervisor {$mitra->nama_perusahaan} - $i",
+                    'name' => "Supervisor {$mitra->nama_mitra} - $i",
                     'email' => "supervisor{$counter}@example.com",
                     'username' => "supervisor{$counter}",
                     'password' => Hash::make('password123'),
-                    'user_type' => 'supervisor',
+                    'role' => 'supervisor',
                     'is_active' => true,
                 ]);
 
-                // Buat data supervisor dan tautkan ke user + perusahaan
+                // Buat data supervisor dan tautkan ke user + mitra
                 Supervisor::create([
                     'user_id' => $user->user_id,
-                    'perusahaan_id' => $mitra->perusahaan_id,
+                    'mitra_id' => $mitra->mitra_id,
                     'nama_supervisor' => $user->name,
                     'jabatan' => $i === 1 ? 'Manager' : 'Staff Senior',
                     'email' => $user->email,

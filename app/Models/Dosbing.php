@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dosbing extends Model
 {
-
-
     use HasFactory;
 
     protected $table = 'dosen_pembimbing';

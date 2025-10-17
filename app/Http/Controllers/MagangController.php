@@ -15,16 +15,16 @@ class MagangController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Magang::with(['mahasiswa', 'perusahaan', 'dosenPembimbing']);
+        $query = Magang::with(['mahasiswa', 'mitra', 'dosenPembimbing']);
 
         // 🔎 Filter berdasarkan mahasiswa
         if ($mahasiswaId = $request->query('mahasiswa_id')) {
             $query->where('mahasiswa_id', $mahasiswaId);
         }
 
-        // 🔎 Filter berdasarkan perusahaan
-        if ($perusahaanId = $request->query('perusahaan_id')) {
-            $query->where('perusahaan_id', $perusahaanId);
+        // 🔎 Filter berdasarkan mitra
+        if ($mitraId = $request->query('mitra_id')) {
+            $query->where('mitra_id', $mitraId);
         }
 
         // 🔎 Filter berdasarkan status
@@ -51,7 +51,7 @@ class MagangController extends Controller
      */
     public function show($id)
     {
-        $magang = Magang::with(['mahasiswa', 'perusahaan', 'dosenPembimbing'])->findOrFail($id);
+        $magang = Magang::with(['mahasiswa', 'mitra', 'dosenPembimbing'])->findOrFail($id);
 
         return response()->json($magang, 200);
     }
@@ -63,7 +63,7 @@ class MagangController extends Controller
     {
         $rules = [
             'mahasiswa_id' => ['required', 'exists:mahasiswa,mahasiswa_id'],
-            'perusahaan_id' => ['required', 'exists:perusahaan,perusahaan_id'],
+            'mitra_id' => ['required', 'exists:mitra,mitra_id'],
             'dosbing_id' => ['nullable', 'exists:dosbing,dosbing_id'],
             'tahun_ajaran' => ['required'],
             'semester_magang' => ['required', 'string', 'max:20'],
@@ -91,7 +91,7 @@ class MagangController extends Controller
 
         return response()->json([
             'message' => 'Data magang berhasil dibuat',
-            'data' => $magang->load(['mahasiswa', 'perusahaan', 'dosenPembimbing'])
+            'data' => $magang->load(['mahasiswa', 'mitra', 'dosenPembimbing'])
         ], 201);
     }
 
@@ -104,8 +104,8 @@ class MagangController extends Controller
 
         $rules = [
             'mahasiswa_id' => ['sometimes', 'exists:mahasiswa,mahasiswa_id'],
-            'perusahaan_id' => ['sometimes', 'exists:perusahaan,perusahaan_id'],
-            'dosbing_id' => ['nullable', 'exists:dosbing,dosbing_id'],
+            'mitra_id' => ['sometimes', 'exists:mitra,mitra_id'],
+            'dosbing_id' => ['nullable', 'exists:dosen_pembimbing,dosbing_id'],
             'tahun_ajaran' => ['sometimes'],
             'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
             'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
@@ -132,7 +132,7 @@ class MagangController extends Controller
 
         return response()->json([
             'message' => 'Data magang berhasil diperbarui',
-            'data' => $magang->fresh()->load(['mahasiswa', 'perusahaan', 'dosenPembimbing'])
+            'data' => $magang->fresh()->load(['mahasiswa', 'mitra', 'dosenPembimbing'])
         ], 200);
     }
 

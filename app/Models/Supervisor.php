@@ -9,12 +9,12 @@ class Supervisor extends Model
 {
     use HasFactory;
 
-    protected $table = 'supervisor_perusahaan';
+    protected $table = 'supervisor';
     protected $primaryKey = 'supervisor_id';
 
     protected $fillable = [
         'user_id',
-        'perusahaan_id',
+        'mitra_id',
         'nama_supervisor',
         'jabatan',
         'email',
@@ -22,9 +22,9 @@ class Supervisor extends Model
     ];
 
     // 🔗 Relasi
-    public function perusahaan()
+    public function mitra()
     {
-        return $this->belongsTo(Mitra::class, 'perusahaan_id', 'perusahaan_id');
+        return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
     }
 
     public function user()
