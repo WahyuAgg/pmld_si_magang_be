@@ -6,6 +6,9 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Mahasiswa;
 use Illuminate\Support\Facades\Hash;
+use Faker\Factory as Faker;
+
+
 
 class MahasiswaSeeder extends Seeder
 {
@@ -18,7 +21,6 @@ class MahasiswaSeeder extends Seeder
             for ($i = 1; $i <= 8; $i++) {
                 // 1. Buat user dulu
                 $user = User::create([
-                    'name' => "Mahasiswa {$angkatan} - {$i}",
                     'email' => "mhs{$angkatan}{$i}@example.com",
                     'username' => "mhs{$angkatan}{$i}",
                     'password' => Hash::make('password123'),
@@ -26,11 +28,14 @@ class MahasiswaSeeder extends Seeder
                     'is_active' => true,
                 ]);
 
+                $faker = Faker::create();
+
+
                 // 2. Buat mahasiswa terkait user
                 Mahasiswa::create([
                     'user_id' => $user->user_id,
                     'nim' => "NIM{$angkatan}" . str_pad($i, 3, '0', STR_PAD_LEFT),
-                    'nama' => $user->name,
+                    'nama' => $faker->name, // contoh: "Budi Santoso" atau "Rina Anggraini"
                     'email' => $user->email,
                     'no_hp' => '08' . rand(111111111, 999999999),
                     'angkatan' => $angkatan,

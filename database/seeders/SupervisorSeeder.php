@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\Mitra;
 use App\Models\Supervisor;
 use Illuminate\Support\Facades\Hash;
+use Faker\Factory as Faker;
+
+
 
 class SupervisorSeeder extends Seeder
 {
@@ -22,7 +25,6 @@ class SupervisorSeeder extends Seeder
             for ($i = 1; $i <= 2; $i++) {
                 // Buat dulu akun user supervisor
                 $user = User::create([
-                    'name' => "Supervisor {$mitra->nama_mitra} - $i",
                     'email' => "supervisor{$counter}@example.com",
                     'username' => "supervisor{$counter}",
                     'password' => Hash::make('password123'),
@@ -31,10 +33,14 @@ class SupervisorSeeder extends Seeder
                 ]);
 
                 // Buat data supervisor dan tautkan ke user + mitra
+
+                $faker = Faker::create();
+
+
                 Supervisor::create([
                     'user_id' => $user->user_id,
                     'mitra_id' => $mitra->mitra_id,
-                    'nama_supervisor' => $user->name,
+                    'nama_supervisor' => $faker->name,
                     'jabatan' => $i === 1 ? 'Manager' : 'Staff Senior',
                     'email' => $user->email,
                     'no_hp' => '08' . rand(111111111, 999999999),
