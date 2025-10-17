@@ -66,14 +66,14 @@ class MagangController extends Controller
             'mitra_id' => ['required', 'exists:mitra,mitra_id'],
             'dosbing_id' => ['nullable'],
             'tahun_ajaran' => ['required'],
-            'semester_magang' => ['required', 'string', 'max:20'],
+            'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
             'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
-            'status_magang' => ['nullable', Rule::in(['pending','berjalan','selesai','batal'])],
+            'status_magang' => ['nullable', Rule::in(['draft', 'berlangsung', 'selesai', 'ditolak'])],
         ];
 
         $validator = Validator::make($request->all(), $rules);
