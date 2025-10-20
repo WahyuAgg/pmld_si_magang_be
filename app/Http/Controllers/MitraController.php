@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mitra;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\Magang;
 
 use Illuminate\Http\Request;
 
@@ -15,7 +16,9 @@ class MitraController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mitra::with(['supervisor', 'magang']);
+        // $query = Mitra::with(['supervisor', 'magang']);
+        $query = Mitra::query();
+
 
         // Pencarian: nama_mitra atau bidang_usaha
         if ($search = $request->query('q')) {
@@ -30,8 +33,8 @@ class MitraController extends Controller
             $query->where('bidang_usaha', $bidang);
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $mitra = $query->orderBy('nama_mitra')->paginate($perPage);
+        $perPage = (int) $request->query('per_page', 100);
+        $mitra = $query->orderBy('mitra_id')->paginate($perPage);
 
         return response()->json($mitra, 200);
     }
@@ -131,10 +134,14 @@ class MitraController extends Controller
         //     return response()->json(['message' => 'Tidak dapat dihapus: masih memiliki relasi'], 400);
         // }
 
+        Magang::where('mitra_id', $id)->update(['mitra_id' => null]);
+
         $mitra->delete();
 
         return response()->json([
             'message' => 'Mitra berhasil dihapus'
         ], 200);
+
+
     }
 }

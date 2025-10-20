@@ -28,7 +28,7 @@ class DosbingController extends Controller
         }
 
         $perPage = (int) $request->query('per_page', 15);
-        $dosbing = $query->orderBy('nama')->paginate($perPage);
+        $dosbing = $query->orderBy('dosbing_id')->paginate($perPage);
 
         return response()->json($dosbing, 200);
     }

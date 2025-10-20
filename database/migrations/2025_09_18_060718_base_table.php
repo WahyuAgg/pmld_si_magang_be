@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -15,7 +14,7 @@ return new class extends Migration {
             $table->id('user_id');
             $table->string('username', 50)->unique();
             $table->string('password', 255);
-            $table->enum('role', ['admin','mahasiswa','supervisor', 'dosbing']);
+            $table->enum('role', ['admin', 'mahasiswa', 'supervisor', 'dosbing']);
             $table->boolean('is_active')->default(true);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -72,7 +71,7 @@ return new class extends Migration {
             $table->boolean('status_aktif')->default(true);
             $table->timestamps();
 
-            $table->primary(['mahasiswa_id','user_id']);
+            $table->primary(['mahasiswa_id', 'user_id']);
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
@@ -81,7 +80,7 @@ return new class extends Migration {
         // Table: supervisor
         // ======================
         Schema::create('supervisor', function (Blueprint $table) {
-            $table->unsignedBigInteger('supervisor_id')->autoIncrement();
+            $table->id('supervisor_id');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('mitra_id');
             $table->string('nama_supervisor', 100);
@@ -90,20 +89,19 @@ return new class extends Migration {
             $table->string('no_hp', 15)->nullable();
             $table->timestamps();
 
-            $table->primary(['supervisor_id','mitra_id']);
             $table->foreign('user_id')->references('user_id')->on('users')->nullOnDelete();
-            $table->foreign('mitra_id')->references('mitra_id')->on('mitra');
+            $table->foreign('mitra_id')->references('mitra_id')->on('mitra')->onDelete('cascade');
         });
 
         // ======================
         // Table: magang
         // ======================
         Schema::create('magang', function (Blueprint $table) {
-            $table->unsignedBigInteger('magang_id')->autoIncrement();
+            $table->id('magang_id');
             $table->unsignedBigInteger('mahasiswa_id');
-            $table->unsignedBigInteger('mitra_id');
-            $table->unsignedBigInteger('supervisor_id');
-            $table->unsignedBigInteger('dosbing_id');
+            $table->unsignedBigInteger('mitra_id')->nullable();
+            $table->unsignedBigInteger('supervisor_id')->nullable();
+            $table->unsignedBigInteger('dosbing_id')->nullable();
             $table->year('tahun_ajaran');
             $table->integer('semester_magang');
             $table->integer('jumlah_magang_ke')->default(1);
@@ -112,17 +110,34 @@ return new class extends Migration {
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_selesai')->nullable();
             $table->integer('periode_bulan')->default(5);
-            $table->enum('status_magang', ['draft','berlangsung','selesai','ditolak'])->default('draft');
+            $table->enum('status_magang', ['draft', 'berlangsung', 'selesai', 'ditolak'])->default('draft');
             $table->timestamps();
 
-            $table->primary(['magang_id','mahasiswa_id','mitra_id','dosbing_id']);
+            // Relasi ke tabel mahasiswa
+            $table->foreign('mahasiswa_id')
+                ->references('mahasiswa_id')
+                ->on('mahasiswa')
+                ->onDelete('cascade');
 
-            $table->foreign('mahasiswa_id')->references('mahasiswa_id')->on('mahasiswa');
-            $table->foreign('mitra_id')->references('mitra_id')->on('mitra');
-            $table->foreign('dosbing_id')->references('dosbing_id')->on('dosen_pembimbing');
-            $table->foreign('supervisor_id')->references('supervisor_id')->on('supervisor');
+            // Relasi ke tabel mitra → jika mitra dihapus, set null
+            $table->foreign('mitra_id')
+                ->references('mitra_id')
+                ->on('mitra')
+                ->nullOnDelete(); // ini yang kamu butuhkan
 
+            // Relasi ke dosen pembimbing → set null kalau dosbing dihapus
+            $table->foreign('dosbing_id')
+                ->references('dosbing_id')
+                ->on('dosen_pembimbing')
+                ->nullOnDelete();
+
+            // Relasi ke supervisor → set null kalau supervisor dihapus
+            $table->foreign('supervisor_id')
+                ->references('supervisor_id')
+                ->on('supervisor')
+                ->nullOnDelete();
         });
+
 
     }
 
