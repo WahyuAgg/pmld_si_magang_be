@@ -26,8 +26,8 @@ return new class extends Migration {
         // ======================
         Schema::create('dokumen_magang', function (Blueprint $table) {
             $table->id('dokumen_id');
-            $table->unsignedBigInteger('magang_id')->onDelete('cascade');
-            $table->enum('jenis_dokumen', ['surat_penerimaan', 'pra_krs', 'laporan_magang', 'doc_penilaian_mitra']);
+            $table->unsignedBigInteger('magang_id');
+            $table->enum('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra']);
             $table->string('nama_file', 255);
             $table->string('path_file', 500);
             $table->bigInteger('ukuran_file')->nullable();
@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->timestamp('uploaded_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
-            $table->foreign('magang_id')->references('magang_id')->on('magang');
+            $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
 
         });
 
@@ -69,7 +69,6 @@ return new class extends Migration {
             $table->string('ruangan', 50)->nullable();
             $table->text('keterangan')->nullable();
             $table->enum('status', ['terjadwal', 'selesai', 'dibatalkan'])->default('terjadwal');
-            $table->unsignedBigInteger('created_by');
             $table->timestamps();
 
             $table->unique(['jadwal_id', 'magang_id']);

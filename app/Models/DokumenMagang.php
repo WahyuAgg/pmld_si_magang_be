@@ -12,7 +12,7 @@ class DokumenMagang extends Model
 
     protected $fillable = [
         'magang_id',
-        'jenis_dokumen', //['surat_penerimaan', 'pra_krs', 'laporan_magang', 'doc_penilaian_mitra']
+        'jenis_dokumen', //['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra']
         'nama_file',
         'path_file',
         'ukuran_file',

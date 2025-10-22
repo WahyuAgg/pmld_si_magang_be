@@ -22,8 +22,10 @@ class FotoMagangController extends Controller
             $query->where('logbook_id', $logbookId);
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $fotos = $query->latest('uploaded_at')->paginate($perPage);
+        // $perPage = (int) $request->query('per_page', 15);
+        // $fotos = $query->latest('uploaded_at')->paginate($perPage);
+        $fotos = $query->latest('uploaded_at')->get();
+
 
         return response()->json($fotos, 200);
     }
@@ -43,7 +45,7 @@ class FotoMagangController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'logbook_id' => ['required', 'exists:logbook_magang,logbook_id'],
+            'logbook_id' => ['required', 'exists:logbook,logbook_id'],
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:2048'], // max 2MB
             'keterangan' => ['nullable', 'string', 'max:255'],
         ];

@@ -16,7 +16,7 @@ class LogbookController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Logbook::with(['magang', 'fotoKegiatan']);
+        $query = Logbook::with(['fotoKegiatan']);
 
         // 🔎 Filter berdasarkan magang_id
         if ($magangId = $request->query('magang_id')) {
@@ -28,8 +28,8 @@ class LogbookController extends Controller
             $query->whereDate('tanggal_kegiatan', $tanggal);
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $logbooks = $query->orderByDesc('tanggal_kegiatan')->paginate($perPage);
+        $logbooks = $query->orderByDesc('tanggal_kegiatan')->get();
+
 
         return response()->json($logbooks, 200);
     }

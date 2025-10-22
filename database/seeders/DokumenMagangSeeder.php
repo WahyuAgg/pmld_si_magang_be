@@ -11,7 +11,7 @@ class DokumenMagangSeeder extends Seeder
 {
     public function run(): void
     {
-        $dokumenTypes = ['surat_penerimaan', 'pra_krs', 'laporan_magang', 'doc_penilaian_mitra'];
+        $dokumenTypes = ['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra'];
 
         $magangs = Magang::all();
 

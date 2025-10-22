@@ -25,11 +25,11 @@ use App\Http\Controllers\SupervisorController;
 */
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware('auth.api:sanctum');
 
 
 Route::prefix('user')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(MahasiswaController::class)->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
@@ -52,7 +52,7 @@ Route::prefix('auth')
     });
 
 Route::prefix('auth')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(AuthController::class)->group(function () {
         Route::post('/logout', 'logout');
     });
@@ -64,7 +64,7 @@ Route::prefix('auth')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mahasiswa')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(MahasiswaController::class)->group(function () {
     Route::post('/update', 'update');
     Route::get('/', 'index');
@@ -83,7 +83,7 @@ Route::prefix('mahasiswa')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mitra')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(MitraController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -99,7 +99,7 @@ Route::prefix('mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('magang')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(MagangController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -115,7 +115,7 @@ Route::prefix('magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('logbook')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(LogbookController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -131,12 +131,12 @@ Route::prefix('logbook')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dokumen-magang')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(DokumenMagangController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
     Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
+    Route::post('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
 });
 
@@ -147,7 +147,7 @@ Route::prefix('dokumen-magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('jadwal-presentasi')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(JadwalPresentasiController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -162,15 +162,15 @@ Route::prefix('jadwal-presentasi')
 | Dokumen Penilaian Mitra Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('dokumen-penilaian-mitra')
-->middleware(['auth:sanctum'])
-->controller(DokumenNilaiMitraController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+// Route::prefix('dokumen-penilaian-mitra')
+// ->middleware(['auth.api:sanctum'])
+// ->controller(DokumenNilaiMitraController::class)->group(function () {
+//     Route::get('/', 'index');
+//     Route::post('/', 'store');
+//     Route::get('/{id}', 'show');
+//     Route::put('/{id}', 'update');
+//     Route::delete('/{id}', 'destroy');
+// });
 
 
 /*
@@ -179,7 +179,7 @@ Route::prefix('dokumen-penilaian-mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dosbing')
-->middleware(['auth:sanctum'])
+->middleware(['auth.api:sanctum'])
 ->controller(DosbingController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
@@ -195,7 +195,7 @@ Route::prefix('dosbing')
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(AdminController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -211,7 +211,7 @@ Route::prefix('admin')
 |--------------------------------------------------------------------------
 */
 Route::prefix('foto-magang')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(FotoMagangController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -227,7 +227,7 @@ Route::prefix('foto-magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('penilaian-mitra')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(NilaiMitraController::class)
     ->group(function () {
         Route::get('/', 'index');
@@ -245,7 +245,7 @@ Route::prefix('penilaian-mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('supervisor')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.api:sanctum'])
     ->controller(SupervisorController::class)
     ->group(function () {
         Route::get('/', 'index');

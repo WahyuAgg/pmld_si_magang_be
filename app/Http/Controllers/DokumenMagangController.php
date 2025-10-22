@@ -34,8 +34,9 @@ class DokumenMagangController extends Controller
             $query->where('status_dokumen', $status);
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $dokumen = $query->orderByDesc('uploaded_at')->paginate($perPage);
+        // $perPage = (int) $request->query('per_page', 15);
+        // $dokumen = $query->orderByDesc('uploaded_at')->paginate($perPage);
+        $dokumen = $query->orderByDesc('dokumen_id')->get();
 
         return response()->json($dokumen, 200);
     }
@@ -82,7 +83,7 @@ class DokumenMagangController extends Controller
             'nama_file' => $request->file('file')->getClientOriginalName(),
             'path_file' => $path,
             'ukuran_file' => $request->file('file')->getSize(),
-            'status_dokumen' => $data['status_dokumen'] ?? 'pending',
+            'status_dokumen' => $data['status_dokumen'] ?? 'draft',
             'keterangan' => $data['keterangan'] ?? null,
             'uploaded_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
@@ -102,7 +103,7 @@ class DokumenMagangController extends Controller
         $dokumen = DokumenMagang::findOrFail($id);
 
         $rules = [
-            'jenis_dokumen' => ['required', 'string', 'max:100'],
+            'jenis_dokumen' => ['nullable', 'string', 'max:100'],
             'file' => ['nullable', 'file', 'max:5120'],
             'status_dokumen' => ['nullable', 'string', 'max:50'],
             'keterangan' => ['nullable', 'string'],
@@ -130,7 +131,7 @@ class DokumenMagangController extends Controller
             $dokumen->ukuran_file = $request->file('file')->getSize();
         }
 
-        $dokumen->jenis_dokumen = $data['jenis_dokumen'];
+        $dokumen->jenis_dokumen = $data['jenis_dokumen'] ?? $dokumen->jenis_dokumen;
         $dokumen->status_dokumen = $data['status_dokumen'] ?? $dokumen->status_dokumen;
         $dokumen->keterangan = $data['keterangan'] ?? $dokumen->keterangan;
         $dokumen->updated_at = Carbon::now();

@@ -61,7 +61,6 @@ class JadwalPresentasiController extends Controller
             'ruangan' => ['nullable', 'string', 'max:100'],
             'keterangan' => ['nullable', 'string'],
             'status' => ['nullable', 'string', 'in:terjadwal,selesai,dibatalkan'],
-            'created_by' => ['required', 'string', 'max:100'],
         ];
 
         $validator = Validator::make($request->all(), $rules);

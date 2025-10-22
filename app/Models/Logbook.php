@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Logbook extends Model
 {
-    protected $table = 'logbook_magang';
+    protected $table = 'logbook';
     protected $primaryKey = 'logbook_id';
 
     protected $fillable = [
