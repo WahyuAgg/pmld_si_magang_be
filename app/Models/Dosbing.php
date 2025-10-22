@@ -19,6 +19,10 @@ class Dosbing extends Model
         'no_hp',
         'jabatan',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     // 🔗 Relasi
     public function magang()

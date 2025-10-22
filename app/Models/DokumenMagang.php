@@ -21,6 +21,11 @@ class DokumenMagang extends Model
         'uploaded_at',
         'updated_at',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
 
     // Relasi: DokumenMagang belongsTo Magang
     public function magang()

@@ -27,6 +27,11 @@ class Mahasiswa extends Model
         'status_aktif',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // 🔗 Relasi
     public function user()
     {

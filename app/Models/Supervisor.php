@@ -21,6 +21,11 @@ class Supervisor extends Model
         'no_hp',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // 🔗 Relasi
     public function mitra()
     {

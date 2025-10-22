@@ -16,6 +16,11 @@ class Logbook extends Model
         'deskripsi_kegiatan',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+    
     // Relasi: LogbookMagang belongsTo Magang
     public function magang()
     {

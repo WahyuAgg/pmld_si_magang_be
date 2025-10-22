@@ -28,6 +28,11 @@ class Magang extends Model
         'status_magang',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // ✅ Tambahkan ini
     protected static function booted()
     {

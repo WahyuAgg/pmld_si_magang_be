@@ -21,6 +21,11 @@ class JadwalPresentasi extends Model
         'created_by',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // Relasi: JadwalPresentasi belongsTo Magang
     public function magang()
     {

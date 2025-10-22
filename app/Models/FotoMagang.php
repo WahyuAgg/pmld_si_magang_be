@@ -17,6 +17,10 @@ class FotoMagang extends Model
         'keterangan',
         'uploaded_at',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     // Relasi: FotoKegiatan belongsTo LogbookMagang
     public function logbook()

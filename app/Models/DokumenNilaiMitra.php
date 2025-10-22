@@ -19,6 +19,10 @@ class DokumenNilaiMitra extends Model
         'keterangan',
         'uploaded_at',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     // Relasi: DokumenPenilaianMitra belongsTo Magang
     public function magang()

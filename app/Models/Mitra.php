@@ -22,6 +22,11 @@ class Mitra extends Model
         'deskripsi',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // 🔗 Relasi
     public function supervisor()
     {

@@ -16,6 +16,11 @@ class NilaiMitra extends Model
         'keterangan',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // Relasi: PenilaianMitra belongsTo Magang
     public function magang()
     {
