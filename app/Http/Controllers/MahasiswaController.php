@@ -33,8 +33,8 @@ class MahasiswaController extends Controller
             $query->where('status_aktif', $request->query('status_aktif'));
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $mahasiswa = $query->orderBy('nama')->paginate($perPage);
+        $perPage = (int) $request->query('per_page', 20);
+        $mahasiswa = $query->orderByDesc('mahasiswa_id')->paginate($perPage);
 
         return response()->json($mahasiswa, 200);
     }

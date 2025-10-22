@@ -45,9 +45,9 @@ Route::prefix('user')
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')
-->controller(AuthController::class)->group(function () {
-    Route::post('/login', 'login');
-    Route::post('/register', 'register');
+    ->controller(AuthController::class)->group(function () {
+        Route::post('/login', 'login');
+        Route::post('/register', 'register');
 
     });
 
@@ -64,17 +64,17 @@ Route::prefix('auth')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mahasiswa')
-->middleware(['auth.api:sanctum'])
-->controller(MahasiswaController::class)->group(function () {
-    Route::post('/update', 'update');
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::delete('/{id}', 'destroy');
+    ->middleware(['auth.api:sanctum'])
+    ->controller(MahasiswaController::class)->group(function () {
+        Route::post('/update', 'update');
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::delete('/{id}', 'destroy');
 
-    // Custom
-    Route::post('import/','import');
-});
+        // Custom
+        Route::post('import/', 'import');
+    });
 
 
 /*
@@ -83,14 +83,15 @@ Route::prefix('mahasiswa')
 |--------------------------------------------------------------------------
 */
 Route::prefix('mitra')
-->middleware(['auth.api:sanctum'])
-->controller(MitraController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(MitraController::class)->group(function () {
+        Route::get('/magang/{id}', 'getMitraByMagang');
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*
@@ -99,14 +100,14 @@ Route::prefix('mitra')
 |--------------------------------------------------------------------------
 */
 Route::prefix('magang')
-->middleware(['auth.api:sanctum'])
-->controller(MagangController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(MagangController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*
@@ -115,14 +116,14 @@ Route::prefix('magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('logbook')
-->middleware(['auth.api:sanctum'])
-->controller(LogbookController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(LogbookController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*
@@ -131,14 +132,14 @@ Route::prefix('logbook')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dokumen-magang')
-->middleware(['auth.api:sanctum'])
-->controller(DokumenMagangController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::post('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(DokumenMagangController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::post('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*
@@ -147,14 +148,14 @@ Route::prefix('dokumen-magang')
 |--------------------------------------------------------------------------
 */
 Route::prefix('jadwal-presentasi')
-->middleware(['auth.api:sanctum'])
-->controller(JadwalPresentasiController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(JadwalPresentasiController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*
@@ -179,14 +180,16 @@ Route::prefix('jadwal-presentasi')
 |--------------------------------------------------------------------------
 */
 Route::prefix('dosbing')
-->middleware(['auth.api:sanctum'])
-->controller(DosbingController::class)->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
-});
+    ->middleware(['auth.api:sanctum'])
+    ->controller(DosbingController::class)->group(function () {
+        Route::get('/magang/{id}', 'getDosbingByMagangId');
+
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
 
 
 /*

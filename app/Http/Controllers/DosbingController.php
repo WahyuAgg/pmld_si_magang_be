@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Dosbing;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\Magang;
+use App\Models\Mitra;
 
 use Illuminate\Http\Request;
 
@@ -113,5 +115,13 @@ class DosbingController extends Controller
         return response()->json([
             'message' => 'Dosen pembimbing berhasil dihapus',
         ], 200);
+    }
+
+    public function getDosbingByMagangId($id){
+        $magang = Magang::where('magang_id', $id)->first();
+        $dosbingId = $magang->dosbing_id;
+        $dosbing = Dosbing::where('dosbing_id', $dosbingId)->first();
+        return response()->json($dosbing, 200);
+
     }
 }

@@ -144,4 +144,13 @@ class MitraController extends Controller
 
 
     }
+
+    public function getMitraByMagang($id){
+        $magang = Magang::where('magang_id', $id)->first();
+        $mitraId = $magang->mitra_id;
+        $mitra = Mitra::where('mitra_id', $mitraId)->first();
+        return response()->json($mitra, 200);
+
+
+    }
 }

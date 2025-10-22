@@ -17,6 +17,8 @@ class DokumenMagangController extends Controller
      */
     public function index(Request $request)
     {
+
+
         $query = DokumenMagang::with('magang');
 
         // Filter berdasarkan magang_id

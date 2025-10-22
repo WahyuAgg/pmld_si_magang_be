@@ -15,36 +15,49 @@ class MagangController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user(); // ambil user dari token
+        $mahasiswa = $user->mahasiswa; // jika ada relasi di model User
+        $mahasiswa_id = $mahasiswa->mahasiswa_id;
+
         $query = Magang::with(['mahasiswa', 'mitra', 'dosenPembimbing']);
 
-        // 🔎 Filter berdasarkan mahasiswa
+        // 🔐 Filter otomatis jika role adalah mahasiswa
+        if ($user->role === 'mahasiswa') {
+            // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
+            $query->where('mahasiswa_id', $mahasiswa->mahasiswa_id);
+        }
+
+        // 🔎 Filter manual berdasarkan query param (admin bisa gunakan ini)
         if ($mahasiswaId = $request->query('mahasiswa_id')) {
             $query->where('mahasiswa_id', $mahasiswaId);
         }
 
-        // 🔎 Filter berdasarkan mitra
         if ($mitraId = $request->query('mitra_id')) {
             $query->where('mitra_id', $mitraId);
         }
 
-        // 🔎 Filter berdasarkan status
         if ($status = $request->query('status_magang')) {
             $query->where('status_magang', $status);
         }
 
-        // 🔎 Pencarian jobdesk/role
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('jobdesk', 'like', "%{$search}%")
-                  ->orWhere('role_magang', 'like', "%{$search}%");
+                    ->orWhere('role_magang', 'like', "%{$search}%");
             });
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $magang = $query->orderByDesc('tanggal_mulai')->paginate($perPage);
+        // $perPage = (int) $request->query('per_page', 15);
+        // $magang = $query->orderByDesc('tanggal_mulai')->paginate($perPage);
+        $magang = $query->orderByDesc('tanggal_mulai')->get();
+
+        // return response()->json([$user, $mahasiswa], 200);
+
+
 
         return response()->json($magang, 200);
     }
+
 
     /**
      * Tampilkan detail magang berdasarkan id (magang_id).
