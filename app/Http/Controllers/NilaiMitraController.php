@@ -49,7 +49,6 @@ class NilaiMitraController extends Controller
     {
         $rules = [
             'magang_id' => ['required', 'exists:magang,magang_id'],
-            'supervisor_id' => ['required', 'exists:supervisor,supervisor_id'],
             'nilai' => ['required', 'numeric', 'between:0,100'],
             'keterangan' => ['nullable', 'string', 'max:255'],
         ];
