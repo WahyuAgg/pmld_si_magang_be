@@ -41,6 +41,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User registered successfully.',
             'user' => $user,
+            'role' => $user->role,
             'access_token' => $token,
             'token_type' => 'Bearer',
             'expires_at' => $token_expired,
@@ -75,6 +76,7 @@ class AuthController extends Controller
 
         return response()->json([
             'access_token' => $token,
+            'role' => $user->role,
             'token_type' => 'Bearer',
             'expires_at' => $token_expired,
         ]);
