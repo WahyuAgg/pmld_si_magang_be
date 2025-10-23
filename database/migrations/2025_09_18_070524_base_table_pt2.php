@@ -44,22 +44,6 @@ return new class extends Migration {
         });
 
         // ======================
-        // Table: dokumen_penilaian_mitra
-        // ======================
-        // Schema::create('dokumen_penilaian_mitra', function (Blueprint $table) {
-        //     $table->id('dokumen_penilaian_id');
-        //     $table->unsignedBigInteger('magang_id');
-        //     $table->string('nama_file', 255);
-        //     $table->string('path_file', 500);
-        //     $table->string('jenis_dokumen', 100)->nullable();
-        //     $table->text('keterangan')->nullable();
-        //     $table->timestamp('uploaded_at')->useCurrent();
-
-        //     $table->foreign('magang_id')->references('magang_id')->on('magang');
-
-        // });
-
-        // ======================
         // Table: jadwal_presentasi
         // ======================
         Schema::create('jadwal_presentasi', function (Blueprint $table) {
