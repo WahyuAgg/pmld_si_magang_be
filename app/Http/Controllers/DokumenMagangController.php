@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DokumenMagang;
+use App\Models\Magang;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -17,9 +18,11 @@ class DokumenMagangController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
 
 
         $query = DokumenMagang::with('magang');
+
 
         // Filter berdasarkan magang_id
         if ($magangId = $request->query('magang_id')) {
@@ -163,5 +166,20 @@ class DokumenMagangController extends Controller
         return response()->json([
             'message' => 'Dokumen berhasil dihapus',
         ], 200);
+    }
+
+    public function getDocMagangByMagang(Request $request, $id){
+        // $user = $request->user();
+        // $mahasiswa = $user->mahasiswa;
+        $magang = Magang::findOrFail($id);
+
+        // if ($user->role === 'mahasiswa' && $mahasiswa->mahasiswa_id !== $magang->mahasiswa_id) {
+        //     abort(403, 'Access denied.');
+        // }
+
+        $documents = DokumenMagang::where('magang_id', $magang->magang_id)->get();
+        return response()->json([ 'dokumen' => $documents], 200);
+
+
     }
 }

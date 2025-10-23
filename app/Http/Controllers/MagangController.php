@@ -17,11 +17,10 @@ class MagangController extends Controller
     {
         $user = $request->user(); // ambil user dari token
         $mahasiswa = $user->mahasiswa; // jika ada relasi di model User
-        $mahasiswa_id = $mahasiswa->mahasiswa_id;
 
         $query = Magang::with(['mahasiswa', 'mitra', 'dosenPembimbing']);
 
-        // 🔐 Filter otomatis jika role adalah mahasiswa
+        // Filter otomatis jika role adalah mahasiswmahasiswaIda
         if ($user->role === 'mahasiswa') {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
             $query->where('mahasiswa_id', $mahasiswa->mahasiswa_id);
@@ -34,6 +33,10 @@ class MagangController extends Controller
 
         if ($mitraId = $request->query('mitra_id')) {
             $query->where('mitra_id', $mitraId);
+        }
+
+        if ($status = $request->query('jumlah_magang')) {
+            $query->where('status_magang', $status);
         }
 
         if ($status = $request->query('status_magang')) {

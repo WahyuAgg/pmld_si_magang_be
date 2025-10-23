@@ -20,7 +20,17 @@ class MahasiswaController extends Controller
     {
         $query = Mahasiswa::with(['user', 'magang']);
 
-        // Pencarian: nama atau nim
+        $user = $request->user(); // ambil user dari token
+        $mahasiswa = $user->mahasiswa; // jika ada relasi di model User
+        $mahasiswaId = $mahasiswa->mahasiswa_id;
+
+        // Filter otomatis jika role adalah mahasiswa
+        if ($user->role === 'mahasiswa') {
+            // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
+            $query->where('mahasiswa_id', $mahasiswaId);
+        }
+
+        // 🔍 Pencarian global (nama atau NIM)
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
@@ -28,16 +38,51 @@ class MahasiswaController extends Controller
             });
         }
 
-        // Filter status aktif (opsional)
-        if ($request->query('status_aktif') !== null) {
+        // 🎓 Filter status aktif
+        if (!is_null($request->query('status_aktif'))) {
             $query->where('status_aktif', $request->query('status_aktif'));
         }
 
-        $perPage = (int) $request->query('per_page', 20);
-        $mahasiswa = $query->orderByDesc('mahasiswa_id')->paginate($perPage);
+        // 🎓 Filter angkatan (tahun masuk)
+        if ($angkatan = $request->query('angkatan')) {
+            $query->where('angkatan', $angkatan);
+        }
+
+        // 🧭 Filter semester
+        if ($semester = $request->query('semester')) {
+            $query->where('semester', $semester);
+        }
+
+        // 🏙️ Filter berdasarkan alamat (partial match)
+        if ($alamat = $request->query('alamat')) {
+            $query->where('alamat', 'like', "%{$alamat}%");
+        }
+
+        // 👤 Filter berdasarkan user_id
+        if ($userId = $request->query('user_id')) {
+            $query->where('user_id', $userId);
+        }
+
+        // 📅 Filter range angkatan (contoh: 2020-2023)
+        // if ($range = $request->query('angkatan_range')) {
+        //     [$from, $to] = explode('-', $range);
+        //     $query->whereBetween('angkatan', [(int) $from, (int) $to]);
+        // }
+
+        // 📈 Sorting dinamis
+        $sortBy = $request->query('sort_by', 'mahasiswa_id');
+        $sortOrder = $request->query('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // 📄 Pagination
+        // $perPage = (int) $request->query('per_page', 20);
+        // $mahasiswa = $query->paginate($perPage);
+        $mahasiswa = $query->get();
+
 
         return response()->json($mahasiswa, 200);
     }
+
 
     /**
      * Tampilkan detail mahasiswa berdasarkan id (mahasiswa_id).
@@ -195,46 +240,6 @@ class MahasiswaController extends Controller
 
 
 
-    // CUSTOM
-
-    public function import0(Request $request)
-    {
-        // Validasi file CSV
-        $request->validate([
-            'file' => 'required|mimes:csv,txt',
-        ]);
-
-        $file = $request->file('file');
-
-        // Buka file
-        $handle = fopen($file->getRealPath(), "r");
-
-        // Lewati header (NO;NIM;NAMA)
-        $header = fgetcsv($handle, 1000, ";");
-
-        $imported = [];
-        while (($row = fgetcsv($handle, 1000, ";")) !== false) {
-            [$no, $nim, $nama] = $row;
-
-            // Buat user baru atau skip jika sudah ada
-            $user = User::firstOrCreate(
-                ['username' => $nim],
-                [
-                    'email' => $nim . '@example.com', // kalau email wajib unik
-                    'password' => Hash::make($nama),
-                ]
-            );
-
-            $imported[] = $user;
-        }
-
-        fclose($handle);
-
-        return response()->json([
-            'message' => 'Import berhasil',
-            'data' => $imported,
-        ]);
-    }
 
     public function import(Request $request)
     {

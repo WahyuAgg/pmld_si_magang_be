@@ -134,6 +134,7 @@ Route::prefix('logbook')
 Route::prefix('dokumen-magang')
     ->middleware(['auth.api:sanctum'])
     ->controller(DokumenMagangController::class)->group(function () {
+        Route::get('/magang/{id}', 'getDocMagangByMagang');
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');
@@ -251,6 +252,7 @@ Route::prefix('supervisor')
     ->middleware(['auth.api:sanctum'])
     ->controller(SupervisorController::class)
     ->group(function () {
+        Route::get('/magang/{id}', 'getSupervisorByMagang');
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');

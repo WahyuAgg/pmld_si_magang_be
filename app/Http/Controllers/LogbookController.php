@@ -39,7 +39,7 @@ class LogbookController extends Controller
      */
     public function show($id)
     {
-        $logbook = Logbook::with(['magang', 'fotoKegiatan'])->findOrFail($id);
+        $logbook = Logbook::with([ 'fotoKegiatan'])->findOrFail($id);
 
         return response()->json($logbook, 200);
     }
@@ -120,5 +120,9 @@ class LogbookController extends Controller
         return response()->json([
             'message' => 'Logbook berhasil dihapus',
         ], 200);
+    }
+
+    public function getLogbookByMagang($id){
+
     }
 }

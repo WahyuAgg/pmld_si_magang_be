@@ -12,7 +12,10 @@ class NilaiMitra extends Model
     protected $fillable = [
         'magang_id',
         'supervisor_id',
-        'nilai',
+        'nilai_teknis',
+        'nilai_profesionalisme_etika',
+        'nilai_komunikasi_presentasi',
+        'nilai_proyek_pengalaman_industri',
         'keterangan',
     ];
 
@@ -26,12 +29,5 @@ class NilaiMitra extends Model
     {
         return $this->belongsTo(Magang::class, 'magang_id', 'magang_id');
     }
-
-    // Relasi: PenilaianMitra belongsTo Supervisormitra
-    public function supervisor()
-    {
-        return $this->belongsTo(Supervisor::class, 'supervisor_id', 'supervisor_id');
-    }
-
 
 }

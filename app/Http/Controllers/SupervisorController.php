@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Magang;
 use App\Models\Supervisor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -239,4 +240,27 @@ class SupervisorController extends Controller
             'message' => 'Supervisor berhasil dihapus',
         ], 200);
     }
+
+    public function getSupervisorByMagang(Request $request, $id)
+    {
+
+        // Policy
+        $user = $request->user(); // ambil user dari token
+        $mahasiswa = $user->mahasiswa; // relasi user -> mahasiswa
+
+        // Ambil data magang berdasarkan ID
+        $magang = Magang::where('magang_id', $id)->firstOrFail();
+
+        // Validasi hak akses
+        if ($user->role === 'mahasiswa' && $mahasiswa->mahasiswa_id !== $magang->mahasiswa_id) {
+            // mahasiswa mencoba akses magang yang bukan miliknya
+            abort(403, 'Access denied.');
+        }
+
+        // Ambil data supervisor yang terkait
+        $supervisor = Supervisor::where('supervisor_id', $magang->supervisor_id)->first();
+
+        return response()->json($supervisor, 200);
+    }
+
 }

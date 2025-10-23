@@ -13,7 +13,10 @@ return new class extends Migration {
         Schema::create('penilaian_mitra', function (Blueprint $table) {
             $table->id('penilaian_id');
             $table->unsignedBigInteger('magang_id');
-            $table->decimal('nilai', 5, 2);
+            $table->decimal('nilai_teknis', 5, 2);
+            $table->decimal('nilai_profesionalisme_etika', 5, 2);
+            $table->decimal('nilai_komunikasi_presentasi', 5, 2);
+            $table->decimal('nilai_proyek_pengalaman_industri', 5, 2);
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
@@ -43,18 +46,18 @@ return new class extends Migration {
         // ======================
         // Table: dokumen_penilaian_mitra
         // ======================
-        Schema::create('dokumen_penilaian_mitra', function (Blueprint $table) {
-            $table->id('dokumen_penilaian_id');
-            $table->unsignedBigInteger('magang_id');
-            $table->string('nama_file', 255);
-            $table->string('path_file', 500);
-            $table->string('jenis_dokumen', 100)->nullable();
-            $table->text('keterangan')->nullable();
-            $table->timestamp('uploaded_at')->useCurrent();
+        // Schema::create('dokumen_penilaian_mitra', function (Blueprint $table) {
+        //     $table->id('dokumen_penilaian_id');
+        //     $table->unsignedBigInteger('magang_id');
+        //     $table->string('nama_file', 255);
+        //     $table->string('path_file', 500);
+        //     $table->string('jenis_dokumen', 100)->nullable();
+        //     $table->text('keterangan')->nullable();
+        //     $table->timestamp('uploaded_at')->useCurrent();
 
-            $table->foreign('magang_id')->references('magang_id')->on('magang');
+        //     $table->foreign('magang_id')->references('magang_id')->on('magang');
 
-        });
+        // });
 
         // ======================
         // Table: jadwal_presentasi
