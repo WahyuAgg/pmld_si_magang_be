@@ -3,58 +3,72 @@
 namespace App\Http\Controllers;
 
 use App\Models\NilaiMitra;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class NilaiMitraController extends Controller
 {
     /**
-     * Tampilkan semua penilaian mitra
+     * Tampilkan daftar penilaian mitra (dengan filter opsional).
      */
     public function index(Request $request)
     {
-        $query = NilaiMitra::with(['magang', 'supervisor']);
+        $query = NilaiMitra::with(['magang']);
 
-        // Filter by magang_id
-        if ($magangId = $request->query('magang_id')) {
-            $query->where('magang_id', $magangId);
+        // 🔍 Filter by magang_id
+        if ($request->query('magang_id')) {
+            $query->where('magang_id', $request->query('magang_id'));
         }
 
-        // Filter by supervisor_id
-        if ($supervisorId = $request->query('supervisor_id')) {
-            $query->where('supervisor_id', $supervisorId);
+
+        // 🔍 Filter by minimum nilai_teknis
+        if ($request->query('min_teknis')) {
+            $query->where('nilai_teknis', '>=', $request->query('min_teknis'));
         }
 
-        $perPage = (int) $request->query('per_page', 15);
-        $data = $query->latest('penilaian_id')->paginate($perPage);
+        // 🔍 Filter by maximum nilai_teknis
+        if ($request->query('max_teknis')) {
+            $query->where('nilai_teknis', '<=', $request->query('max_teknis'));
+        }
+
+        // 🔍 Filter by range profesionalisme
+        if ($request->query('range_profesional')) {
+            [$min, $max] = explode('-', $request->query('range_profesional'));
+            $query->whereBetween('nilai_profesionalisme_etika', [(int) $min, (int) $max]);
+        }
+
+        // 🔍 Filter by keyword (cari di keterangan)
+        if ($request->query('q')) {
+            $search = $request->query('q');
+            $query->where('keterangan', 'like', "%{$search}%");
+        }
+
+        // 🔁 Sorting dinamis
+        $sortBy = $request->query('sort_by', 'penilaian_id');
+        $sortOrder = $request->query('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // 📄 Pagination
+        $perPage = (int) $request->query('per_page', 20);
+        $data = $query->paginate($perPage);
 
         return response()->json($data, 200);
     }
 
     /**
-     * Detail penilaian mitra
-     */
-    public function show($id)
-    {
-        $nilai = NilaiMitra::with(['magang', 'supervisor'])->findOrFail($id);
-        return response()->json($nilai, 200);
-    }
-
-    /**
-     * Tambah penilaian mitra
+     * Simpan penilaian mitra baru.
      */
     public function store(Request $request)
     {
-        $rules = [
+        $validator = Validator::make($request->all(), [
             'magang_id' => ['required', 'exists:magang,magang_id'],
-            'supervisor_id' => ['required', 'exists:supervisor,supervisor_id'],
-            'nilai' => ['required', 'numeric', 'between:0,100'],
-            'keterangan' => ['nullable', 'string', 'max:255'],
-        ];
+            'nilai_teknis' => ['required', 'numeric', 'min:0', 'max:100'],
+            'nilai_profesionalisme_etika' => ['required', 'numeric', 'min:0', 'max:100'],
+            'nilai_komunikasi_presentasi' => ['required', 'numeric', 'min:0', 'max:100'],
+            'nilai_proyek_pengalaman_industri' => ['required', 'numeric', 'min:0', 'max:100'],
+            'keterangan' => ['nullable', 'string'],
+        ]);
 
-        $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validasi gagal',
@@ -62,27 +76,39 @@ class NilaiMitraController extends Controller
             ], 422);
         }
 
-        $nilai = NilaiMitra::create($request->all());
+        $nilaiMitra = NilaiMitra::create($validator->validated());
 
         return response()->json([
-            'message' => 'Penilaian mitra berhasil ditambahkan',
-            'data' => $nilai->load(['magang', 'supervisor']),
+            'message' => 'Penilaian mitra berhasil dibuat',
+            'data' => $nilaiMitra->load('magang'),
         ], 201);
     }
 
     /**
-     * Update penilaian mitra
+     * Tampilkan detail penilaian mitra.
+     */
+    public function show($id)
+    {
+        $nilaiMitra = NilaiMitra::with('magang')->findOrFail($id);
+
+        return response()->json($nilaiMitra, 200);
+    }
+
+    /**
+     * Update penilaian mitra.
      */
     public function update(Request $request, $id)
     {
-        $nilai = NilaiMitra::findOrFail($id);
+        $nilaiMitra = NilaiMitra::findOrFail($id);
 
-        $rules = [
-            'nilai' => ['nullable', 'numeric', 'between:0,100'],
-            'keterangan' => ['nullable', 'string', 'max:255'],
-        ];
+        $validator = Validator::make($request->all(), [
+            'nilai_teknis' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'nilai_profesionalisme_etika' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'nilai_komunikasi_presentasi' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'nilai_proyek_pengalaman_industri' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'keterangan' => ['nullable', 'string'],
+        ]);
 
-        $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validasi gagal',
@@ -90,24 +116,24 @@ class NilaiMitraController extends Controller
             ], 422);
         }
 
-        $nilai->update($request->only(['nilai', 'keterangan']));
+        $nilaiMitra->update($validator->validated());
 
         return response()->json([
             'message' => 'Penilaian mitra berhasil diperbarui',
-            'data' => $nilai->fresh()->load(['magang', 'supervisor']),
+            'data' => $nilaiMitra->fresh()->load('magang'),
         ], 200);
     }
 
     /**
-     * Hapus penilaian mitra
+     * Hapus penilaian mitra.
      */
     public function destroy($id)
     {
-        $nilai = NilaiMitra::findOrFail($id);
-        $nilai->delete();
+        $nilaiMitra = NilaiMitra::findOrFail($id);
+        $nilaiMitra->delete();
 
         return response()->json([
-            'message' => 'Penilaian mitra berhasil dihapus',
+            'message' => 'Penilaian mitra berhasil dihapus'
         ], 200);
     }
 }

@@ -11,7 +11,6 @@ class NilaiMitra extends Model
 
     protected $fillable = [
         'magang_id',
-        'supervisor_id',
         'nilai_teknis',
         'nilai_profesionalisme_etika',
         'nilai_komunikasi_presentasi',
