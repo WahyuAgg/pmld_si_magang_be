@@ -21,7 +21,10 @@ class Dosbing extends Model
     ];
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'email',
+        'no_hp',
+        'jabatan'
     ];
 
     // 🔗 Relasi

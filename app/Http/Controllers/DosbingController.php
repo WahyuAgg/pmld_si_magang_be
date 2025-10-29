@@ -52,7 +52,7 @@ class DosbingController extends Controller
         $rules = [
             'nip' => ['required', 'string', 'max:30', 'unique:dosen_pembimbing,nip'],
             'nama' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email', 'unique:dosen_pembimbing,email'],
+            'email' => ['nullable', 'email', 'unique:dosen_pembimbing,email'],
             'no_hp' => ['nullable', 'string', 'max:20'],
             'jabatan' => ['nullable', 'string', 'max:100'],
         ];
@@ -83,7 +83,7 @@ class DosbingController extends Controller
         $rules = [
             'nip' => ['sometimes', 'required', 'string', 'max:30', 'unique:dosen_pembimbing,nip,' . $dosbing->dosbing_id . ',dosbing_id'],
             'nama' => ['sometimes', 'required', 'string', 'max:150'],
-            'email' => ['sometimes', 'required', 'email', 'unique:dosen_pembimbing,email,' . $dosbing->dosbing_id . ',dosbing_id'],
+            'email' => ['nullable', 'email', 'unique:dosen_pembimbing,email,' . $dosbing->dosbing_id . ',dosbing_id'],
             'no_hp' => ['nullable', 'string', 'max:20'],
             'jabatan' => ['nullable', 'string', 'max:100'],
         ];
