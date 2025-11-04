@@ -21,7 +21,10 @@ class DatabaseSeeder extends Seeder
             SupervisorSeeder::class,
             MagangSeeder::class,
             DokumenMagangSeeder::class,
-
+            LogbookSeeder::class,
+            JadwalPresentasiSeeder::class,
+            NilaiMitraSeeder::class,
+            FotoMagangSeeder::class,
         ]);
     }
 }
