@@ -27,13 +27,13 @@ class MahasiswaController extends Controller
         // Filter otomatis jika role adalah mahasiswa
         if ($user->role === 'mahasiswa') {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
-            $query->where('mahasiswa_id', $mahasiswaId);
+            $query->where('mahasiswa_id', $);
         }
 
         // 🔍 Pencarian global (nama atau NIM)
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
+                $q->where('nama', 'like', "%{$search}%")mahasiswaId
                     ->orWhere('nim', 'like', "%{$search}%");
             });
         }
@@ -51,6 +51,13 @@ class MahasiswaController extends Controller
         // 🧭 Filter semester
         if ($semester = $request->query('semester')) {
             $query->where('semester', $semester);
+        }
+
+        // 🧭 Filter semester magang // draft
+        if ($semester_magang = $request->get('semester_magang')) {
+            $query->whereHas('magang', function ($q) use ($semester) {
+                $q->where('semester_magang', $semester);
+            });
         }
 
         // 🏙️ Filter berdasarkan alamat (partial match)
