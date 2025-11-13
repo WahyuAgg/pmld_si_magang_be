@@ -15,12 +15,8 @@ class JadwalPresentasiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = JadwalPresentasi::with('magang');
-
-        // Filter berdasarkan magang_id
-        if ($magangId = $request->query('magang_id')) {
-            $query->where('magang_id', $magangId);
-        }
+        // Gunakan query builder, bukan get()
+        $query = JadwalPresentasi::query();
 
         // Filter berdasarkan status
         if ($status = $request->query('status')) {
@@ -32,18 +28,20 @@ class JadwalPresentasiController extends Controller
             $query->whereDate('tanggal_presentasi', $tanggal);
         }
 
+        // Pagination dan urutan
         $perPage = (int) $request->query('per_page', 15);
         $jadwal = $query->orderBy('tanggal_presentasi')->paginate($perPage);
 
         return response()->json($jadwal, 200);
     }
 
+
     /**
      * Tampilkan detail jadwal presentasi.
      */
     public function show($id)
     {
-        $jadwal = JadwalPresentasi::with('magang')->findOrFail($id);
+        $jadwal = JadwalPresentasi::findOrFail($id);
         return response()->json($jadwal, 200);
     }
 
@@ -53,12 +51,13 @@ class JadwalPresentasiController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'magang_id' => ['required', 'exists:magang,magang_id'],
+            // 'magang_id' => ['required', 'exists:magang,magang_id'],
             'tanggal_presentasi' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'waktu_selesai' => ['required', 'date_format:H:i', 'after:waktu_mulai'],
-            'tempat' => ['required', 'string', 'max:150'],
-            'ruangan' => ['nullable', 'string', 'max:100'],
+            'ruangan' => ['required', 'string', 'max:100'],
+
+            'tempat' => ['nullable', 'string', 'max:150'],
             'keterangan' => ['nullable', 'string'],
             'status' => ['nullable', 'string', 'in:terjadwal,selesai,dibatalkan'],
         ];
@@ -75,7 +74,7 @@ class JadwalPresentasiController extends Controller
 
         return response()->json([
             'message' => 'Jadwal presentasi berhasil dibuat',
-            'data' => $jadwal->load('magang'),
+            'data' => $jadwal,
         ], 201);
     }
 
@@ -90,8 +89,9 @@ class JadwalPresentasiController extends Controller
             'tanggal_presentasi' => ['sometimes', 'required', 'date'],
             'waktu_mulai' => ['sometimes', 'required', 'date_format:H:i'],
             'waktu_selesai' => ['sometimes', 'required', 'date_format:H:i', 'after:waktu_mulai'],
-            'tempat' => ['sometimes', 'required', 'string', 'max:150'],
-            'ruangan' => ['nullable', 'string', 'max:100'],
+            'ruangan' => ['required', 'string', 'max:100'],
+
+            'tempat' => ['nullable', 'string', 'max:150'],
             'keterangan' => ['nullable', 'string'],
             'status' => ['nullable', 'string', 'in:terjadwal,selesai,dibatalkan'],
         ];
@@ -108,7 +108,7 @@ class JadwalPresentasiController extends Controller
 
         return response()->json([
             'message' => 'Jadwal presentasi berhasil diperbarui',
-            'data' => $jadwal->fresh()->load('magang'),
+            'data' => $jadwal->fresh(),
         ], 200);
     }
 

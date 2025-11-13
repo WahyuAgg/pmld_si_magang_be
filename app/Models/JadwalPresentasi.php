@@ -23,7 +23,10 @@ class JadwalPresentasi extends Model
 
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'status',
+        'keterangan',
+        'tempat',
     ];
 
     // Relasi: JadwalPresentasi belongsTo Magang
