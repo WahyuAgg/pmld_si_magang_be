@@ -40,7 +40,7 @@ class DosbingController extends Controller
      */
     public function show($id)
     {
-        $dosbing = Dosbing::with('magang')->findOrFail($id);
+        $dosbing = Dosbing::findOrFail($id);
         return response()->json($dosbing, 200);
     }
 
