@@ -48,7 +48,7 @@ return new class extends Migration {
         // ======================
         Schema::create('jadwal_presentasi', function (Blueprint $table) {
             $table->id('jadwal_id');
-            $table->unsignedBigInteger('magang_id')->nullable();
+            // $table->unsignedBigInteger('magang_id')->nullable();
             $table->date('tanggal_presentasi')->nullable();
             $table->string('waktu_mulai', 20)->nullable();
             $table->string('waktu_selesai', 20)->nullable();
@@ -58,9 +58,9 @@ return new class extends Migration {
             $table->enum('status', ['terjadwal', 'selesai', 'dibatalkan'])->default('terjadwal');
             $table->timestamps();
 
-            $table->unique(['jadwal_id', 'magang_id']);
+            // $table->unique(['jadwal_id', 'magang_id']);
 
-            $table->foreign('magang_id')->references('magang_id')->on('magang');
+            // $table->foreign('magang_id')->references('magang_id')->on('magang');
         });
 
         // ======================
