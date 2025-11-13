@@ -30,13 +30,14 @@ class MahasiswaController extends Controller
             $query->where('mahasiswa_id', $);
         }
 
-        // 🔍 Pencarian global (nama atau NIM)
-        if ($search = $request->query('q')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")mahasiswaId
-                    ->orWhere('nim', 'like', "%{$search}%");
-            });
-        }
+// 🔍 Pencarian global (nama atau NIM)
+if ($search = $request->query('q')) {
+    $query->where(function ($q) use ($search) {
+        $q->where('nama', 'like', "%{$search}%")
+          ->orWhere('nim', 'like', "%{$search}%");
+    });
+}
+
 
         // 🎓 Filter status aktif
         if (!is_null($request->query('status_aktif'))) {
