@@ -30,6 +30,10 @@ class Mahasiswa extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
+        'status_aktif',
+        'no_hp',
+        'semester',
+        
     ];
 
     // 🔗 Relasi

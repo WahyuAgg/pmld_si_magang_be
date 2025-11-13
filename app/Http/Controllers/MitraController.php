@@ -33,7 +33,7 @@ class MitraController extends Controller
             $query->where('bidang_usaha', $bidang);
         }
 
-        $perPage = (int) $request->query('per_page', 100);
+        $perPage = (int) $request->query('per_page', 10);
         $mitra = $query->orderBy('mitra_id')->paginate($perPage);
 
         return response()->json($mitra, 200);

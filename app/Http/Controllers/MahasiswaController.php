@@ -54,8 +54,8 @@ class MahasiswaController extends Controller
 
         // 🧭 Filter semester magang // draft
         if ($semester_magang = $request->get('semester_magang')) {
-            $query->whereHas('magang', function ($q) use ($semester) {
-                $q->where('semester_magang', $semester);
+            $query->whereHas('magang', function ($q) use ($semester_magang) {
+                $q->where('semester_magang', $semester_magang);
             });
         }
 
@@ -81,9 +81,9 @@ class MahasiswaController extends Controller
         $query->orderBy($sortBy, $sortOrder);
 
         // 📄 Pagination
-        // $perPage = (int) $request->query('per_page', 20);
-        // $mahasiswa = $query->paginate($perPage);
-        $mahasiswa = $query->get();
+        $perPage = (int) $request->query('per_page', 10);
+        $mahasiswa = $query->paginate($perPage);
+        // $mahasiswa = $query->get();
 
 
         return response()->json($mahasiswa, 200);
