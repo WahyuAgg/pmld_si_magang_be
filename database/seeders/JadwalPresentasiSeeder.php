@@ -16,7 +16,6 @@ class JadwalPresentasiSeeder extends Seeder
     {
         DB::table('jadwal_presentasi')->insert([
             [
-                'magang_id' => 1,
                 'tanggal_presentasi' => Carbon::create(2025, 11, 10),
                 'waktu_mulai' => '09:00',
                 'waktu_selesai' => '10:00',
@@ -28,7 +27,6 @@ class JadwalPresentasiSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'magang_id' => 2,
                 'tanggal_presentasi' => Carbon::create(2025, 11, 12),
                 'waktu_mulai' => '13:00',
                 'waktu_selesai' => '14:00',
@@ -40,7 +38,6 @@ class JadwalPresentasiSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'magang_id' => 3,
                 'tanggal_presentasi' => Carbon::create(2025, 11, 15),
                 'waktu_mulai' => '10:00',
                 'waktu_selesai' => '11:00',
@@ -52,7 +49,6 @@ class JadwalPresentasiSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'magang_id' => 4,
                 'tanggal_presentasi' => Carbon::create(2025, 11, 18),
                 'waktu_mulai' => '08:00',
                 'waktu_selesai' => '09:00',

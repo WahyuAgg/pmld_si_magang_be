@@ -29,6 +29,7 @@ class MitraSeeder extends Seeder
                 'alamat' => "Jl. Contoh Alamat No.$i, Kota Contoh",
                 'no_telp' => '021' . rand(1000000, 9999999),
                 'email' => "mitra$i@example.com",
+                'narahubung' => " Nama narahubung $i",
                 'website' => "https://www.mitra$i.com",
                 'bidang_usaha' => $bidangUsaha[array_rand($bidangUsaha)],
                 'deskripsi' => "PT Mitra Sejahtera $i bergerak di bidang {$bidangUsaha[array_rand($bidangUsaha)]}.",
