@@ -20,11 +20,17 @@ class Mitra extends Model
         'website',
         'bidang_usaha',
         'deskripsi',
+        'narahubung',
     ];
 
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'deskripsi',
+        'bidang_usaha',
+        'website',
+        'no_telp',
+        'alamat',
     ];
 
     // 🔗 Relasi

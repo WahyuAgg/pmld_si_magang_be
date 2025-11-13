@@ -11,20 +11,20 @@ use Illuminate\Http\Request;
 
 class MitraController extends Controller
 {
-     /**
+    /**
      * Tampilkan daftar mitra (dengan pagination dan pencarian sederhana).
      */
     public function index(Request $request)
     {
-        $query = Mitra::with(['supervisor', 'magang']);
-        // $query = Mitra::query();
+        // $query = Mitra::with(['supervisor', 'magang']);
+        $query = Mitra::with(['supervisor']);
 
 
         // Pencarian: nama_mitra atau bidang_usaha
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_mitra', 'like', "%{$search}%")
-                  ->orWhere('bidang_usaha', 'like', "%{$search}%");
+                    ->orWhere('bidang_usaha', 'like', "%{$search}%");
             });
         }
 
@@ -44,7 +44,9 @@ class MitraController extends Controller
      */
     public function show($id)
     {
-        $mitra = Mitra::with(['supervisor', 'magang'])->findOrFail($id);
+        // $mitra = Mitra::with(['supervisor', 'magang'])->findOrFail($id);
+        $mitra = Mitra::with(['supervisor'])->findOrFail($id);
+
 
         return response()->json($mitra, 200);
     }
@@ -62,6 +64,7 @@ class MitraController extends Controller
             'website' => ['nullable', 'url', 'max:255'],
             'bidang_usaha' => ['nullable', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string'],
+            'narahubung' => ['nullable', 'string'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -92,7 +95,9 @@ class MitraController extends Controller
 
         $rules = [
             'nama_mitra' => [
-                'required', 'string', 'max:255',
+                'required',
+                'string',
+                'max:255',
                 Rule::unique('mitra', 'nama_mitra')->ignore($mitra->mitra_id, 'mitra_id')
             ],
             'alamat' => ['nullable', 'string'],
@@ -145,7 +150,8 @@ class MitraController extends Controller
 
     }
 
-    public function getMitraByMagang($id){
+    public function getMitraByMagang($id)
+    {
         $magang = Magang::where('magang_id', $id)->first();
         $mitraId = $magang->mitra_id;
         $mitra = Mitra::where('mitra_id', $mitraId)->first();
