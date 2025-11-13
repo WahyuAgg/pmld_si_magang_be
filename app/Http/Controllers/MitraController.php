@@ -16,8 +16,8 @@ class MitraController extends Controller
      */
     public function index(Request $request)
     {
-        // $query = Mitra::with(['supervisor', 'magang']);
-        $query = Mitra::query();
+        $query = Mitra::with(['supervisor', 'magang']);
+        // $query = Mitra::query();
 
 
         // Pencarian: nama_mitra atau bidang_usaha

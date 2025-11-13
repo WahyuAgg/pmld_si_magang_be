@@ -21,23 +21,21 @@ class MahasiswaController extends Controller
         $query = Mahasiswa::with(['user', 'magang']);
 
         $user = $request->user(); // ambil user dari token
-        $mahasiswa = $user->mahasiswa; // jika ada relasi di model User
-        $mahasiswaId = $mahasiswa->mahasiswa_id;
+        $mahasiswaId = optional($user->mahasiswa)->mahasiswa_id; // gunakan optional agar aman
 
         // Filter otomatis jika role adalah mahasiswa
-        if ($user->role === 'mahasiswa') {
+        if ($user->role === 'mahasiswa'&& $mahasiswaId) {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
-            $query->where('mahasiswa_id', $);
+            $query->where('mahasiswa_id', $mahasiswaId);
         }
 
-// 🔍 Pencarian global (nama atau NIM)
-if ($search = $request->query('q')) {
-    $query->where(function ($q) use ($search) {
-        $q->where('nama', 'like', "%{$search}%")
-          ->orWhere('nim', 'like', "%{$search}%");
-    });
-}
-
+        // 🔍 Pencarian global (nama atau NIM)
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
 
         // 🎓 Filter status aktif
         if (!is_null($request->query('status_aktif'))) {
