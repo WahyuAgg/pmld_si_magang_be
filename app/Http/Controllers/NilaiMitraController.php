@@ -13,7 +13,10 @@ class NilaiMitraController extends Controller
      */
     public function index(Request $request)
     {
-        $query = NilaiMitra::with(['magang']);
+        $query = NilaiMitra::with([
+            'magang:magang_id,mahasiswa_id',
+            'magang.mahasiswa:mahasiswa_id,nama'
+        ]);
 
         // 🔍 Filter by magang_id
         if ($request->query('magang_id')) {
@@ -50,7 +53,7 @@ class NilaiMitraController extends Controller
 
         // 📄 Pagination
         $perPage = (int) $request->query('per_page', 20);
-        $data = $query->paginate($perPage);
+        $data = $query->get();
 
         return response()->json($data, 200);
     }
@@ -67,6 +70,8 @@ class NilaiMitraController extends Controller
             'nilai_komunikasi_presentasi' => ['required', 'numeric', 'min:0', 'max:100'],
             'nilai_proyek_pengalaman_industri' => ['required', 'numeric', 'min:0', 'max:100'],
             'keterangan' => ['nullable', 'string'],
+            'supervisor' => ['required', 'string'],
+            'jabatan_supervisor' => ['required', 'string']
         ]);
 
         if ($validator->fails()) {
@@ -80,7 +85,8 @@ class NilaiMitraController extends Controller
 
         return response()->json([
             'message' => 'Penilaian mitra berhasil dibuat',
-            'data' => $nilaiMitra->load('magang'),
+            'data' => $nilaiMitra->load('magang:magang_id,mahasiswa_id', 'magang.mahasiswa:mahasiswa_id,nama'),
+
         ], 201);
     }
 
@@ -89,7 +95,7 @@ class NilaiMitraController extends Controller
      */
     public function show($id)
     {
-        $nilaiMitra = NilaiMitra::with('magang')->findOrFail($id);
+        $nilaiMitra = NilaiMitra::with('magang.mahasiswa')->findOrFail($id);
 
         return response()->json($nilaiMitra, 200);
     }

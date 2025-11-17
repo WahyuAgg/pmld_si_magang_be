@@ -63,4 +63,10 @@ class Magang extends Model
     {
         return $this->belongsTo(Dosbing::class, 'dosbing_id', 'dosbing_id');
     }
+
+    public function dokumen()
+    {
+        return $this->hasMany(DokumenMagang::class, 'magang_id', 'magang_id');
+    }
+
 }

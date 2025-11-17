@@ -19,6 +19,7 @@ class Supervisor extends Model
         'jabatan',
         'email',
         'no_hp',
+        
     ];
 
     protected $hidden = [

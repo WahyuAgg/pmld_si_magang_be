@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->decimal('nilai_komunikasi_presentasi', 5, 2);
             $table->decimal('nilai_proyek_pengalaman_industri', 5, 2);
             $table->text('keterangan')->nullable();
+            $table->string('supervisor', 255);
+            $table->string('jabatan_supervisor', 255);
             $table->timestamps();
 
             $table->foreign('magang_id')->references('magang_id')->on('magang');

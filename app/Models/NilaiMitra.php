@@ -16,6 +16,8 @@ class NilaiMitra extends Model
         'nilai_komunikasi_presentasi',
         'nilai_proyek_pengalaman_industri',
         'keterangan',
+        'supervisor',
+        'jabatan_supervisor',
     ];
 
     protected $hidden = [
