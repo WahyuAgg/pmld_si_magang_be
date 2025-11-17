@@ -14,6 +14,7 @@ class Mitra extends Model
 
     protected $fillable = [
         'nama_mitra',
+        'user_id',
         'alamat',
         'no_telp',
         'email',
@@ -34,13 +35,18 @@ class Mitra extends Model
     ];
 
     // 🔗 Relasi
-    public function supervisor()
-    {
-        return $this->hasMany(Supervisor::class, 'mitra_id', 'mitra_id');
-    }
+    // public function supervisor()
+    // {
+    //     return $this->hasMany(Supervisor::class, 'mitra_id', 'mitra_id');
+    // }
 
     public function magang()
     {
         return $this->hasMany(Magang::class, 'mitra_id', 'mitra_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

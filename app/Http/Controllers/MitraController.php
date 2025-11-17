@@ -6,6 +6,8 @@ use App\Models\Mitra;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\Magang;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 use Illuminate\Http\Request;
 
@@ -78,11 +80,28 @@ class MitraController extends Controller
 
         $data = $validator->validated();
 
+        $username = Str::before($data['email'], '@');
+
+
+        $user = User::firstOrCreate(
+            ['email' => $data['email']],
+            [
+                'email' => $data['email'],
+                'username' => $username,
+                'password' => $username,
+                'role' => 'mitra'
+            ]
+        );
+
+        $data['user_id'] = $user->user_id;
+
         $mitra = Mitra::create($data);
+
+
 
         return response()->json([
             'message' => 'Mitra berhasil dibuat',
-            'data' => $mitra->load(['supervisor', 'magang'])
+            'data' => $mitra->load(['user'])
         ], 201);
     }
 

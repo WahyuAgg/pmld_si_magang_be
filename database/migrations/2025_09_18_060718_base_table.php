@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id('user_id');
             $table->string('username', 50)->unique();
             $table->string('password', 255);
-            $table->enum('role', ['admin', 'mahasiswa', 'supervisor', 'dosbing']);
+            $table->enum('role', ['admin', 'mahasiswa', 'mitra', 'dosbing']);
             $table->boolean('is_active')->default(true);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -40,6 +40,7 @@ return new class extends Migration {
         // ======================
         Schema::create('mitra', function (Blueprint $table) {
             $table->id('mitra_id');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('nama_mitra', 150);
             $table->text('alamat')->nullable();
             $table->string('no_telp', 15)->nullable();
@@ -48,6 +49,9 @@ return new class extends Migration {
             $table->string('bidang_usaha', 100)->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+
         });
 
 
@@ -100,7 +104,7 @@ return new class extends Migration {
             $table->id('magang_id');
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('mitra_id')->nullable();
-            $table->unsignedBigInteger('supervisor_id')->nullable();
+            // $table->unsignedBigInteger('supervisor_id')->nullable();
             $table->unsignedBigInteger('dosbing_id')->nullable();
             $table->year('tahun_ajaran');
             $table->integer('semester_magang');
@@ -132,10 +136,10 @@ return new class extends Migration {
                 ->nullOnDelete();
 
             // Relasi ke supervisor → set null kalau supervisor dihapus
-            $table->foreign('supervisor_id')
-                ->references('supervisor_id')
-                ->on('supervisor')
-                ->nullOnDelete();
+            // $table->foreign('supervisor_id')
+            //     ->references('supervisor_id')
+            //     ->on('supervisor')
+            //     ->nullOnDelete();
         });
 
 

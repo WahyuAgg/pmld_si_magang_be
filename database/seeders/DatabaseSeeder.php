@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             MahasiswaSeeder::class,
             DosbingSeeder::class,
             MitraSeeder::class,
-            SupervisorSeeder::class,
+            // SupervisorSeeder::class,
             MagangSeeder::class,
             DokumenMagangSeeder::class,
             LogbookSeeder::class,

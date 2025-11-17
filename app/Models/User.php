@@ -19,7 +19,7 @@ class User extends Authenticatable
         'email',
         'username',
         'password',
-        'role', // constraint roles: admin, mahasiswa, supervisor, dosbing
+        'role', // constraint roles: admin, mahasiswa, mitra, dosbing
         'is_active',
     ];
 

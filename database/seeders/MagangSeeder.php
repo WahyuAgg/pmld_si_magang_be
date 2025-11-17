@@ -21,7 +21,7 @@ class MagangSeeder extends Seeder
                 'mahasiswa_id' => $mhs->mahasiswa_id,
                 'mitra_id' => rand(1, 16), // random mitra id
                 'dosbing_id' => rand(1, 20), // random dosbing id
-                'supervisor_id' => rand(1, 32), // random dosbing id
+                // 'supervisor_id' => rand(1, 32), // random dosbing id
                 'tahun_ajaran' => $tahunAjaran,
                 'semester_magang' => 6,
                 'jumlah_magang_ke' => 1,
@@ -38,7 +38,7 @@ class MagangSeeder extends Seeder
                 'mahasiswa_id' => $mhs->mahasiswa_id,
                 'mitra_id' => rand(1, 16), // random mitra id
                 'dosbing_id' => rand(1, 20), // random dosbing id
-                'supervisor_id' => rand(1, 32), // random dosbing id
+                // 'supervisor_id' => rand(1, 32), // random dosbing id
                 'tahun_ajaran' => $tahunAjaran,
                 'semester_magang' => 7,
                 'jumlah_magang_ke' => 2,
