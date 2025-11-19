@@ -27,7 +27,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'tokens',
+        'email_verified_at',
+        'is_active',
     ];
 
 
@@ -55,8 +58,8 @@ class User extends Authenticatable
         return $this->hasOne(Admin::class, 'user_id', 'user_id');
     }
 
-    public function supervisor()
+    public function mitra()
     {
-        return $this->hasOne(Supervisor::class, 'user_id', 'user_id');
+        return $this->hasOne(Mitra::class, 'user_id', 'user_id');
     }
 }

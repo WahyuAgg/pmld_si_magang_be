@@ -43,6 +43,10 @@ class MagangController extends Controller
             $query->where('status_magang', $status);
         }
 
+        if ($semester_magang = $request->query('semester_magang')) {
+            $query->where('semester_magang', $semester_magang);
+        }
+
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('jobdesk', 'like', "%{$search}%")

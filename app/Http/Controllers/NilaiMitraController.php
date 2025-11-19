@@ -14,46 +14,55 @@ class NilaiMitraController extends Controller
     public function index(Request $request)
     {
         $query = NilaiMitra::with([
-            'magang:magang_id,mahasiswa_id',
-            'magang.mahasiswa:mahasiswa_id,nama'
+            'magang:mitra_id,magang_id,mahasiswa_id',
+            'magang.mahasiswa:mahasiswa_id,nama',
+            // 'magang.mitra'
         ]);
 
-        // 🔍 Filter by magang_id
+        //  Filter by magang_id
         if ($request->query('magang_id')) {
             $query->where('magang_id', $request->query('magang_id'));
         }
 
 
-        // 🔍 Filter by minimum nilai_teknis
+        //  Filter by minimum nilai_teknis
         if ($request->query('min_teknis')) {
             $query->where('nilai_teknis', '>=', $request->query('min_teknis'));
         }
 
-        // 🔍 Filter by maximum nilai_teknis
+        //  Filter by maximum nilai_teknis
         if ($request->query('max_teknis')) {
             $query->where('nilai_teknis', '<=', $request->query('max_teknis'));
         }
 
-        // 🔍 Filter by range profesionalisme
+        //  Filter by Mitra
+        if ($request->query('mitra_id')) {
+            $query->whereHas('magang', function ($q) use ($request) {
+                $q->where('mitra_id', $request->query('mitra_id'));
+            });
+        }
+
+
+        //  Filter by range profesionalisme
         if ($request->query('range_profesional')) {
             [$min, $max] = explode('-', $request->query('range_profesional'));
             $query->whereBetween('nilai_profesionalisme_etika', [(int) $min, (int) $max]);
         }
 
-        // 🔍 Filter by keyword (cari di keterangan)
+        //  Filter by keyword (cari di keterangan)
         if ($request->query('q')) {
             $search = $request->query('q');
             $query->where('keterangan', 'like', "%{$search}%");
         }
 
-        // 🔁 Sorting dinamis
+        //  Sorting dinamis
         $sortBy = $request->query('sort_by', 'penilaian_id');
         $sortOrder = $request->query('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        // 📄 Pagination
-        $perPage = (int) $request->query('per_page', 20);
-        $data = $query->get();
+        //  Pagination
+        $perPage = (int) $request->query('per_page', 15);
+        $data = $query->paginate($perPage);
 
         return response()->json($data, 200);
     }

@@ -18,7 +18,7 @@ class Magang extends Model
         'supervisor_id',
         'dosbing_id',
         'tahun_ajaran',
-        'semester_magang',
+        'semester_magang', 
         'jumlah_magang_ke',
         'role_magang',
         'jobdesk',
