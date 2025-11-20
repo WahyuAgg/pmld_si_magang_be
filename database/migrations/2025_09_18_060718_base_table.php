@@ -62,7 +62,7 @@ return new class extends Migration {
         // Table: mahasiswa
         // ======================
         Schema::create('mahasiswa', function (Blueprint $table) {
-            $table->unsignedBigInteger('mahasiswa_id')->autoIncrement();
+            $table->id('mahasiswa_id');
             $table->unsignedBigInteger('user_id');
             $table->string('nim', 20)->unique();
             $table->string('nama', 100);
@@ -75,7 +75,7 @@ return new class extends Migration {
             $table->boolean('status_aktif')->default(true);
             $table->timestamps();
 
-            $table->primary(['mahasiswa_id', 'user_id']);
+
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
