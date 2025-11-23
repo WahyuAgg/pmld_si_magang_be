@@ -87,6 +87,7 @@ Route::prefix('mahasiswa')
 Route::prefix('mitra')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(MitraController::class)->group(function () {
+        Route::get('/jumlah', 'jumlahMitra');
         Route::get('/magang/{id}', 'getMitraByMagang');
         Route::get('/', 'index');
         Route::post('/', 'store');
@@ -104,6 +105,7 @@ Route::prefix('mitra')
 Route::prefix('magang')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(MagangController::class)->group(function () {
+        Route::get('/aktif/jumlah', 'jumlahMagangAktif');
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');
@@ -172,7 +174,7 @@ Route::prefix('dosbing')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(DosbingController::class)->group(function () {
         Route::get('/magang/{id}', 'getDosbingByMagangId');
-
+        Route::get('/jumlah', 'jumlahDosbing');
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');

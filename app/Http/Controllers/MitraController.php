@@ -178,4 +178,10 @@ class MitraController extends Controller
 
 
     }
+
+    public function jumlahMitra()
+    {
+        $jumlah = Mitra::count();
+        return response()->json(['jumlah_mitra' => $jumlah], 200);
+    }
 }

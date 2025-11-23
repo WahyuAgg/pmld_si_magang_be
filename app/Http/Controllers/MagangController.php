@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
+
 use Illuminate\Http\Request;
 
 class MagangController extends Controller
@@ -41,6 +42,13 @@ class MagangController extends Controller
 
         if ($status = $request->query('status_magang')) {
             $query->where('status_magang', $status);
+        }
+
+
+        if ($angkatan = $request->query('tahun_ajaran')) {
+            $query->whereHas('mahasiswa', function ($q) use ($angkatan) {
+                $q->where('tahun_ajaran', $angkatan);
+            });
         }
 
         if ($semester_magang = $request->query('semester_magang')) {
@@ -169,5 +177,27 @@ class MagangController extends Controller
         return response()->json([
             'message' => 'Data magang berhasil dihapus'
         ], 200);
+    }
+
+    /**
+     * Menghitung jumlah mahasiswa yang sedang magang (status: berlangsung)
+     * pada periode (tahun ajaran) terakhir.
+     */
+    public function jumlahMagangAktif()
+    {
+        // 1. Tentukan tahun ajaran terbaru dari data magang yang ada
+        $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
+
+        if (!$tahunAjaranTerbaru) {
+            // Jika tidak ada data magang sama sekali, kembalikan 0
+            return response()->json(['jumlah_aktif' => 0], 200);
+        }
+
+        // 2. Hitung jumlah magang yang 'berlangsung' pada tahun ajaran tersebut
+        $jumlahAktif = Magang::where('tahun_ajaran', $tahunAjaranTerbaru)
+                              ->where('status_magang', 'berlangsung')
+                              ->count();
+
+        return response()->json(['jumlah_aktif' => $jumlahAktif], 200);
     }
 }

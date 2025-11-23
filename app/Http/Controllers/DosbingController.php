@@ -124,4 +124,10 @@ class DosbingController extends Controller
         return response()->json($dosbing, 200);
 
     }
+
+    public function jumlahDosbing()
+    {
+        $jumlahDosbing = Dosbing::count();
+        return response()->json(['jumlah_dosbing' => $jumlahDosbing], 200);
+    }
 }
