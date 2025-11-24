@@ -45,9 +45,9 @@ class MagangController extends Controller
         }
 
 
-        if ($angkatan = $request->query('tahun_ajaran')) {
+        if ($angkatan = $request->query('angkatan')) {
             $query->whereHas('mahasiswa', function ($q) use ($angkatan) {
-                $q->where('tahun_ajaran', $angkatan);
+                $q->where('angkatan', $angkatan);
             });
         }
 
