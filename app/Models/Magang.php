@@ -30,10 +30,14 @@ class Magang extends Model
 
     protected $hidden = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'supervisor_id',
+        'status_magang',
+
     ];
 
     // ✅ Tambahkan ini
+    
     protected static function booted()
     {
         static::saving(function ($magang) {
