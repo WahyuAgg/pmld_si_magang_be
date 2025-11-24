@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             DokumenMagangSeeder::class,
             LogbookSeeder::class,
             JadwalPresentasiSeeder::class,
-            // NilaiMitraSeeder::class,
+            NilaiMitraSeeder::class,
             FotoMagangSeeder::class,
         ]);
     }
