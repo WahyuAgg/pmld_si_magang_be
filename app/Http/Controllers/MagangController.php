@@ -62,6 +62,18 @@ class MagangController extends Controller
             });
         }
 
+        // 🔎 Filter status penilaian (nilai mitra)
+        if ($penilaian = $request->query('penilaian')) {
+            if ($penilaian === 'none') {
+                // Magang yang BELUM ada penilaian mitra
+                $query->whereDoesntHave('nilaiMitra');
+            } elseif ($penilaian === 'exist') {
+                // Magang yang SUDAH ada penilaian mitra
+                $query->whereHas('nilaiMitra');
+            }
+        }
+
+
         // $perPage = (int) $request->query('per_page', 15);
         // $magang = $query->orderByDesc('tanggal_mulai')->paginate($perPage);
         $magang = $query->orderByDesc('tanggal_mulai')->get();
