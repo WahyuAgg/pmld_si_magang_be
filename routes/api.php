@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FotoMagangController;
 use App\Http\Controllers\NilaiMitraController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -188,16 +189,16 @@ Route::prefix('dosbing')
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')
-    ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
-    ->controller(AdminController::class)
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+// Route::prefix('admin')
+//     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
+//     ->controller(AdminController::class)
+//     ->group(function () {
+//         Route::get('/', 'index');
+//         Route::post('/', 'store');
+//         Route::get('/{id}', 'show');
+//         Route::put('/{id}', 'update');
+//         Route::delete('/{id}', 'destroy');
+//     });
 
 /*
 |--------------------------------------------------------------------------
@@ -263,3 +264,16 @@ Route::prefix('angkatan')
         Route::get('/', 'show');
     });
 
+
+/**
+ * -----------------------------------------------------------------------
+ * Dashboard Routes
+ * -----------------------------------------------------------------------
+ */
+
+Route::prefix('dashboard')
+    ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
+    ->controller(DashboardController::class)
+    ->group(function () {
+        Route::get('/', 'dashboardSummary');
+    });
