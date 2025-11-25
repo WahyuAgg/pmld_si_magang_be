@@ -44,17 +44,20 @@ class DashboardController extends Controller
         // Hitung jumlah mahasiswa magang untuk mitra yang sedang login
         $mitraId = auth()->user()->mitra->mitra_id;
 
-        $jumlahMahasiswaMagang = Magang::where('mitra_id', $mitraId)
-            ->where('status_magang', 'berlangsung')
-            ->count();
+        $jumlahMahasiswaMagangByMitra = Magang::where('mitra_id', $mitraId)
+            ->distinct('mahasiswa_id')
+            ->count('mahasiswa_id');
 
         $jumlahPenilaian = NilaiMitra::whereHas('magang', function ($query) use ($mitraId) {
             $query->where('mitra_id', $mitraId);
         })->count();
 
+        $jumlahMagang = Magang::where('mitra_id', $mitraId)->count();
+
         return response()->json([
-            'jumlah_mahasiswa_magang' => $jumlahMahasiswaMagang,
+            'jumlah_mahasiswa_magang_by_mitra' => $jumlahMahasiswaMagangByMitra,
             'jumlah_penilaian' => $jumlahPenilaian,
+            'jumlah_magang' => $jumlahMagang,
         ], 200);
     }
 }
