@@ -69,4 +69,10 @@ class Magang extends Model
         return $this->hasMany(DokumenMagang::class, 'magang_id', 'magang_id');
     }
 
+    public function nilaiMitra()
+    {
+        return $this->hasOne(NilaiMitra::class, 'magang_id', 'magang_id');
+    }
+
+
 }
