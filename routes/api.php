@@ -275,5 +275,6 @@ Route::prefix('dashboard')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(DashboardController::class)
     ->group(function () {
-        Route::get('/', 'dashboardSummary');
+        Route::get('/admin', 'fetchDashboardDataAdmin');
+        Route::get('/mitra', 'fetchDashboardDataMitra');
     });
