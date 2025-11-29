@@ -29,7 +29,6 @@ class DokumenMagang extends Model
     ];
 
 
-    // Relasi: DokumenMagang belongsTo Magang
     public function magang()
     {
         return $this->belongsTo(Magang::class, 'magang_id', 'magang_id');

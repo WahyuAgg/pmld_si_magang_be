@@ -16,7 +16,7 @@ class LogbookSeeder extends Seeder
         foreach ($magangList as $magang) {
 
             // jumlah log yg ingin dibuat per magang
-            $jumlahLog = rand(5, 10);
+            $jumlahLog = 1;
 
             for ($i = 0; $i < $jumlahLog; $i++) {
                 Logbook::create([
