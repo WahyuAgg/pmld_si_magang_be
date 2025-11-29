@@ -27,21 +27,14 @@ class DokumenMagangSeeder extends Seeder
 
                 $namaFile = $type . '_' . $magang->magang_id . '.pdf';
 
+                // Path asal dan tujuan
                 $sourceFile = 'public/dokumen_magang/sampel_doc.pdf';
                 $destFile   = 'public/dokumen_magang/' . $namaFile;
 
-                // Pastikan file sumber ada
-                if (!Storage::exists($sourceFile)) {
-                    throw new \Exception("File sumber tidak ditemukan: {$sourceFile}");
+                // Copy file fisik
+                if (Storage::exists($sourceFile)) {
+                    Storage::copy($sourceFile, $destFile);
                 }
-
-                // Coba copy
-                $copied = Storage::copy($sourceFile, $destFile);
-
-                if (!$copied) {
-                    throw new \Exception("Gagal menyalin file ke: {$destFile}");
-                }
-
 
                 DokumenMagang::create([
                     'magang_id'       => $magang->magang_id,
