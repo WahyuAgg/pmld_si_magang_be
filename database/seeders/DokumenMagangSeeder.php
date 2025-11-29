@@ -13,6 +13,18 @@ class DokumenMagangSeeder extends Seeder
 {
     public function run(): void
     {
+
+        $files = Storage::disk('public')->files('dokumen_magang');
+
+        foreach ($files as $file) {
+
+            // Abaikan file berisi sampel_doc
+            if (str_contains($file, 'sampel_doc')) {
+                continue;
+            }
+
+            Storage::disk('public')->delete($file);
+        }
         $dokumenTypes = [
             'doc_surat_penerimaan',
             'doc_pra_krs',
@@ -27,14 +39,22 @@ class DokumenMagangSeeder extends Seeder
 
                 $namaFile = $type . '_' . $magang->magang_id . '.pdf';
 
-                // Path asal dan tujuan
-                $sourceFile = 'public/dokumen_magang/sampel_doc.pdf';
-                $destFile   = 'public/dokumen_magang/' . $namaFile;
+                $sourceFile = 'dokumen_magang/sampel_doc.pdf';
+                $destFile   = 'dokumen_magang/' . $namaFile;
 
-                // Copy file fisik
-                if (Storage::exists($sourceFile)) {
-                    Storage::copy($sourceFile, $destFile);
+                // Pastikan file sumber ada
+                if (!Storage::disk('public')->exists($sourceFile)) {
+                    throw new \Exception("File sumber tidak ditemukan");
                 }
+
+                // Coba copy menggunakan disk public
+                $copied = Storage::disk('public')->copy($sourceFile, $destFile);
+
+                if (!$copied) {
+                    throw new \Exception("Gagal menyalin file ke: {$destFile}");
+                }
+
+
 
                 DokumenMagang::create([
                     'magang_id'       => $magang->magang_id,
