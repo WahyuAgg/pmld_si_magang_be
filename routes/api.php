@@ -277,4 +277,5 @@ Route::prefix('dashboard')
     ->group(function () {
         Route::get('/admin', 'fetchDashboardDataAdmin');
         Route::get('/mitra', 'fetchDashboardDataMitra');
+        Route::get('/mahasiswa', 'fetchDashboardDataMahasiswa');
     });
