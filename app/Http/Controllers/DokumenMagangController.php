@@ -13,16 +13,25 @@ use Illuminate\Http\Request;
 
 class DokumenMagangController extends Controller
 {
-     /**
+    /**
      * Tampilkan daftar dokumen magang (dengan filter & pagination).
      */
     public function index(Request $request)
     {
         $user = $request->user();
 
+        $query = DokumenMagang::with('magang:magang_id,mahasiswa_id,semester_magang');
 
-        $query = DokumenMagang::with('magang');
+        // 🔐 Filter otomatis untuk role mahasiswa
+        if ($user && $user->mahasiswa) {
+            // Jika user adalah mahasiswa, filter berdasarkan mahasiswa_id mereka
+            $mahasiswaId = $user->mahasiswa->mahasiswa_id;
 
+            $query->whereHas('magang', function ($q) use ($mahasiswaId) {
+                $q->where('mahasiswa_id', $mahasiswaId);
+            });
+        }
+        // Jika bukan mahasiswa (admin, pembimbing, dll), tampilkan semua dokumen
 
         // Filter berdasarkan magang_id
         if ($magangId = $request->query('magang_id')) {
@@ -39,8 +48,6 @@ class DokumenMagangController extends Controller
             $query->where('status_dokumen', $status);
         }
 
-        // $perPage = (int) $request->query('per_page', 15);
-        // $dokumen = $query->orderByDesc('uploaded_at')->paginate($perPage);
         $dokumen = $query->orderByDesc('dokumen_id')->get();
 
         return response()->json($dokumen, 200);
@@ -168,7 +175,8 @@ class DokumenMagangController extends Controller
         ], 200);
     }
 
-    public function getDocMagangByMagang(Request $request, $id){
+    public function getDocMagangByMagang(Request $request, $id)
+    {
         // $user = $request->user();
         // $mahasiswa = $user->mahasiswa;
         $magang = Magang::findOrFail($id);
@@ -178,7 +186,7 @@ class DokumenMagangController extends Controller
         // }
 
         $documents = DokumenMagang::where('magang_id', $magang->magang_id)->get();
-        return response()->json([ 'dokumen' => $documents], 200);
+        return response()->json(['dokumen' => $documents], 200);
 
 
     }

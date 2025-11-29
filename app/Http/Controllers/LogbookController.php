@@ -11,25 +11,37 @@ use Illuminate\Http\Request;
 
 class LogbookController extends Controller
 {
-     /**
+    /**
      * Tampilkan daftar logbook (dengan filter dan pagination).
      */
     public function index(Request $request)
     {
-        $query = Logbook::with(['fotoKegiatan']);
+        $query = Logbook::with(['fotoKegiatan', 'magang:magang_id,mahasiswa_id,semester_magang']);
 
-        // 🔎 Filter berdasarkan magang_id
+        // 🔐 Filter otomatis untuk role mahasiswa
+        $user = auth()->user();
+
+        if ($user && $user->mahasiswa) {
+            // Jika user adalah mahasiswa, filter berdasarkan mahasiswa_id mereka
+            $mahasiswaId = $user->mahasiswa->mahasiswa_id;
+
+            $query->whereHas('magang', function ($q) use ($mahasiswaId) {
+                $q->where('mahasiswa_id', $mahasiswaId);
+            });
+        }
+        // Jika bukan mahasiswa (admin, pembimbing, dll), tampilkan semua logbook
+
+        // 🔎 Filter berdasarkan magang_id (opsional)
         if ($magangId = $request->query('magang_id')) {
             $query->where('magang_id', $magangId);
         }
 
-        // 🔎 Filter tanggal kegiatan
+        // 🔎 Filter tanggal kegiatan (opsional)
         if ($tanggal = $request->query('tanggal')) {
             $query->whereDate('tanggal_kegiatan', $tanggal);
         }
 
         $logbooks = $query->orderByDesc('tanggal_kegiatan')->get();
-
 
         return response()->json($logbooks, 200);
     }
@@ -39,7 +51,7 @@ class LogbookController extends Controller
      */
     public function show($id)
     {
-        $logbook = Logbook::with([ 'fotoKegiatan'])->findOrFail($id);
+        $logbook = Logbook::with(['fotoKegiatan'])->findOrFail($id);
 
         return response()->json($logbook, 200);
     }
@@ -122,7 +134,8 @@ class LogbookController extends Controller
         ], 200);
     }
 
-    public function getLogbookByMagang($id){
+    public function getLogbookByMagang($id)
+    {
 
     }
 }
