@@ -150,7 +150,7 @@ class MahasiswaController extends Controller
         $user = User::firstOrCreate(
             ['username' => $niu],
             [
-                'email' => $data['email'],
+                'email' => null,
                 'password' => Hash::make($nif), // password = NIF
                 'role' => 'mahasiswa'
             ]
@@ -285,7 +285,7 @@ class MahasiswaController extends Controller
                 ['username' => $niu],
                 // data, if not found
                 [
-                    'email' => $niu . '@example.com', // email dummy unik
+                    'email' => null, // email dummy unik
                     'password' => Hash::make($nif), // password dari bagian akhir
                     'role' => "mahasiswa"
                 ]
