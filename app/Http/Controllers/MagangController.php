@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Magang;
+use App\Models\Mitra;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -101,18 +102,21 @@ class MagangController extends Controller
      */
     public function store(Request $request)
     {
+        // Ambil mahasiswa_id dari user yang sedang login
+        $user = $request->user();
+        $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
+
         $rules = [
-            'mahasiswa_id' => ['required', 'exists:mahasiswa,mahasiswa_id'],
-            'mitra_id' => ['required', 'exists:mitra,mitra_id'],
+            'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
+            'mitra_nama_baru' => ['nullable', 'string', 'max:150', 'required_without:mitra_id'],
             'dosbing_id' => ['nullable'],
-            'supervisor_id' => ['nullable', 'exists:supervisor,supervisor_id'],
             'tahun_ajaran' => ['required'],
             'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
             'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
-            'tanggal_mulai' => ['required', 'date'],
-            'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
+            // 'tanggal_mulai' => ['required', 'date'],
+            // 'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
             'status_magang' => ['nullable', Rule::in(['draft', 'berlangsung', 'selesai', 'ditolak'])],
         ];
@@ -127,6 +131,20 @@ class MagangController extends Controller
         }
 
         $data = $validator->validated();
+
+        // Set mahasiswa_id dari user yang login
+        $data['mahasiswa_id'] = $mahasiswa_id;
+
+        // Jika mitra baru, buat dulu
+        if (!isset($data['mitra_id']) && isset($data['mitra_nama_baru'])) {
+            $mitra = Mitra::create([
+                'nama_mitra' => $data['mitra_nama_baru'],
+                'is_verified' => false,
+            ]);
+            $data['mitra_id'] = $mitra->mitra_id;
+        }
+
+        unset($data['mitra_nama_baru']);
 
         $magang = Magang::create($data);
 
@@ -207,8 +225,8 @@ class MagangController extends Controller
 
         // 2. Hitung jumlah magang yang 'berlangsung' pada tahun ajaran tersebut
         $jumlahAktif = Magang::where('tahun_ajaran', $tahunAjaranTerbaru)
-                              ->where('status_magang', 'berlangsung')
-                              ->count();
+            ->where('status_magang', 'berlangsung')
+            ->count();
 
         return response()->json(['jumlah_aktif' => $jumlahAktif], 200);
     }

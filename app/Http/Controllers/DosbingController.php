@@ -20,8 +20,8 @@ class DosbingController extends Controller
         $query = Dosbing::query();
 
         // Filter berdasarkan nama
-        if ($nama = $request->query('nama')) {
-            $query->where('nama', 'like', "%{$nama}%");
+        if ($search= $request->query('q')) {
+            $query->where('nama', 'like', "%{$search}%");
         }
 
         // Filter berdasarkan jabatan
