@@ -18,22 +18,12 @@ class Mahasiswa extends Model
         'user_id',
         'nim',
         'nama',
-        'email',
-        'no_hp',
         'angkatan',
-        'semester',
-        'alamat',
-        'foto_profile',
-        'status_aktif',
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
-        'status_aktif',
-        'no_hp',
-        'semester',
-        
     ];
 
     // 🔗 Relasi

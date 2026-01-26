@@ -37,15 +37,6 @@ class MagangController extends Controller
             $query->where('mitra_id', $mitraId);
         }
 
-        if ($status = $request->query('jumlah_magang')) {
-            $query->where('status_magang', $status);
-        }
-
-        if ($status = $request->query('status_magang')) {
-            $query->where('status_magang', $status);
-        }
-
-
         if ($angkatan = $request->query('angkatan')) {
             $query->whereHas('mahasiswa', function ($q) use ($angkatan) {
                 $q->where('angkatan', $angkatan);
@@ -77,7 +68,7 @@ class MagangController extends Controller
 
         // $perPage = (int) $request->query('per_page', 15);
         // $magang = $query->orderByDesc('tanggal_mulai')->paginate($perPage);
-        $magang = $query->orderByDesc('tanggal_mulai')->get();
+        $magang = $query->get();
 
         // return response()->json([$user, $mahasiswa], 200);
 
@@ -108,17 +99,11 @@ class MagangController extends Controller
 
         $rules = [
             'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
-            'mitra_nama_baru' => ['nullable', 'string', 'max:150', 'required_without:mitra_id'],
             'dosbing_id' => ['nullable'],
-            'tahun_ajaran' => ['required'],
             'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
-            'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
-            // 'tanggal_mulai' => ['required', 'date'],
-            // 'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
-            'status_magang' => ['nullable', Rule::in(['draft', 'berlangsung', 'selesai', 'ditolak'])],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -136,15 +121,15 @@ class MagangController extends Controller
         $data['mahasiswa_id'] = $mahasiswa_id;
 
         // Jika mitra baru, buat dulu
-        if (!isset($data['mitra_id']) && isset($data['mitra_nama_baru'])) {
-            $mitra = Mitra::create([
-                'nama_mitra' => $data['mitra_nama_baru'],
-                'is_verified' => false,
-            ]);
-            $data['mitra_id'] = $mitra->mitra_id;
-        }
+        // if (!isset($data['mitra_id']) && isset($data['mitra_nama_baru'])) {
+        //     $mitra = Mitra::create([
+        //         'nama_mitra' => $data['mitra_nama_baru'],
+        //         'is_verified' => false,
+        //     ]);
+        //     $data['mitra_id'] = $mitra->mitra_id;
+        // }
 
-        unset($data['mitra_nama_baru']);
+        // unset($data['mitra_nama_baru']);
 
         $magang = Magang::create($data);
 
@@ -165,15 +150,10 @@ class MagangController extends Controller
             'mahasiswa_id' => ['sometimes', 'exists:mahasiswa,mahasiswa_id'],
             'mitra_id' => ['sometimes', 'exists:mitra,mitra_id'],
             'dosbing_id' => ['nullable', 'exists:dosen_pembimbing,dosbing_id'],
-            'tahun_ajaran' => ['sometimes'],
             'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
-            'jumlah_magang_ke' => ['nullable', 'integer', 'min:1'],
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
-            'tanggal_mulai' => ['sometimes', 'date'],
-            'tanggal_selesai' => ['sometimes', 'date', 'after_or_equal:tanggal_mulai'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
-            'status_magang' => ['nullable', Rule::in(['draft', 'berlangsung', 'selesai', 'ditolak'])],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -213,21 +193,21 @@ class MagangController extends Controller
      * Menghitung jumlah mahasiswa yang sedang magang (status: berlangsung)
      * pada periode (tahun ajaran) terakhir.
      */
-    public function jumlahMagangAktif()
-    {
-        // 1. Tentukan tahun ajaran terbaru dari data magang yang ada
-        $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
+    // public function jumlahMagangAktif()
+    // {
+    //     // 1. Tentukan tahun ajaran terbaru dari data magang yang ada
+    //     $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
 
-        if (!$tahunAjaranTerbaru) {
-            // Jika tidak ada data magang sama sekali, kembalikan 0
-            return response()->json(['jumlah_aktif' => 0], 200);
-        }
+    //     if (!$tahunAjaranTerbaru) {
+    //         // Jika tidak ada data magang sama sekali, kembalikan 0
+    //         return response()->json(['jumlah_aktif' => 0], 200);
+    //     }
 
-        // 2. Hitung jumlah magang yang 'berlangsung' pada tahun ajaran tersebut
-        $jumlahAktif = Magang::where('tahun_ajaran', $tahunAjaranTerbaru)
-            ->where('status_magang', 'berlangsung')
-            ->count();
+    //     // 2. Hitung jumlah magang yang 'berlangsung' pada tahun ajaran tersebut
+    //     $jumlahAktif = Magang::where('tahun_ajaran', $tahunAjaranTerbaru)
+    //         ->where('status_magang', 'berlangsung')
+    //         ->count();
 
-        return response()->json(['jumlah_aktif' => $jumlahAktif], 200);
-    }
+    //     return response()->json(['jumlah_aktif' => $jumlahAktif], 200);
+    // }
 }

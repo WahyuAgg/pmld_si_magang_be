@@ -15,30 +15,15 @@ class Mitra extends Model
     protected $fillable = [
         'nama_mitra',
         'user_id',
-        'alamat',
-        'no_telp',
         'email',
-        'website',
-        'bidang_usaha',
-        'deskripsi',
         'narahubung',
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
-        'deskripsi',
-        'bidang_usaha',
-        'website',
-        'no_telp',
-        'alamat',
     ];
 
-    // 🔗 Relasi
-    // public function supervisor()
-    // {
-    //     return $this->hasMany(Supervisor::class, 'mitra_id', 'mitra_id');
-    // }
 
     public function magang()
     {

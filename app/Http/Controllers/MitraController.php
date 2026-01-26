@@ -18,21 +18,14 @@ class MitraController extends Controller
      */
     public function index(Request $request)
     {
-        // $query = Mitra::with(['supervisor', 'magang']);
         $query = Mitra::with(['magang']);
 
 
-        // Pencarian: nama_mitra atau bidang_usaha
+        // Pencarian: nama_mitra
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama_mitra', 'like', "%{$search}%")
-                    ->orWhere('bidang_usaha', 'like', "%{$search}%");
+                $q->where('nama_mitra', 'like', "%{$search}%");
             });
-        }
-
-        // Filter bidang usaha (opsional)
-        if ($bidang = $request->query('bidang_usaha')) {
-            $query->where('bidang_usaha', $bidang);
         }
 
         $perPage = (int) $request->query('per_page', 10);
@@ -46,8 +39,7 @@ class MitraController extends Controller
      */
     public function show($id)
     {
-        // $mitra = Mitra::with(['supervisor', 'magang'])->findOrFail($id);
-        $mitra = Mitra::with(['supervisor'])->findOrFail($id);
+        $mitra = Mitra::with(['magang'])->findOrFail($id);
 
 
         return response()->json($mitra, 200);
@@ -60,12 +52,7 @@ class MitraController extends Controller
     {
         $rules = [
             'nama_mitra' => ['required', 'string', 'max:255', 'unique:mitra,nama_mitra'],
-            'alamat' => ['nullable', 'string'],
-            'no_telp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
-            'bidang_usaha' => ['nullable', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
             'narahubung' => ['nullable', 'string'],
         ];
 
@@ -119,12 +106,8 @@ class MitraController extends Controller
                 'max:255',
                 Rule::unique('mitra', 'nama_mitra')->ignore($mitra->mitra_id, 'mitra_id')
             ],
-            'alamat' => ['nullable', 'string'],
-            'no_telp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
-            'bidang_usaha' => ['nullable', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
+            'narahubung' => ['nullable', 'string'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -142,7 +125,7 @@ class MitraController extends Controller
 
         return response()->json([
             'message' => 'Mitra berhasil diperbarui',
-            'data' => $mitra->fresh()->load(['supervisor', 'magang'])
+            'data' => $mitra->fresh()->load(['magang'])
         ], 200);
     }
 
@@ -152,11 +135,6 @@ class MitraController extends Controller
     public function destroy($id)
     {
         $mitra = Mitra::findOrFail($id);
-
-        // Jika ingin mencegah penghapusan ketika ada relasi, cek di sini:
-        // if ($mitra->supervisor()->exists() || $mitra->magang()->exists()) {
-        //     return response()->json(['message' => 'Tidak dapat dihapus: masih memiliki relasi'], 400);
-        // }
 
         Magang::where('mitra_id', $id)->update(['mitra_id' => null]);
 

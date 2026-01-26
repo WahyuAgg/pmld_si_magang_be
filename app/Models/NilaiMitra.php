@@ -18,6 +18,8 @@ class NilaiMitra extends Model
         'keterangan',
         'supervisor',
         'jabatan_supervisor',
+        'nama_file',
+        'file_path'
     ];
 
     protected $hidden = [

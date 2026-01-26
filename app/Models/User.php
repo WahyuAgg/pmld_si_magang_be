@@ -20,24 +20,19 @@ class User extends Authenticatable
         'username',
         'password',
         'role', // constraint roles: admin, mahasiswa, mitra, dosbing
-        'is_active',
     ];
 
     protected $hidden = [
         'password',
-        'remember_token',
         'created_at',
         'updated_at',
         'tokens',
-        'email_verified_at',
-        'is_active',
     ];
 
 
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

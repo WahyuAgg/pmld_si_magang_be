@@ -20,6 +20,9 @@ return new class extends Migration {
             $table->text('keterangan')->nullable();
             $table->string('supervisor', 255);
             $table->string('jabatan_supervisor', 255);
+            // TODO jangan lupa hapus bang nullable nya
+            $table->string('nama_file')->nullable();
+            $table->string('file_path')->nullable();
             $table->timestamps();
 
             $table->foreign('magang_id')->references('magang_id')->on('magang');
@@ -32,18 +35,36 @@ return new class extends Migration {
         Schema::create('dokumen_magang', function (Blueprint $table) {
             $table->id('dokumen_id');
             $table->unsignedBigInteger('magang_id');
-            $table->enum('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra']);
+            $table->enum('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs']);
             $table->string('nama_file', 255);
-            $table->string('path_file', 500);
+            $table->string('file_path', 500);
             $table->bigInteger('ukuran_file')->nullable();
-            $table->enum('status_dokumen', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
-            $table->text('keterangan')->nullable();
             $table->timestamp('uploaded_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
 
         });
+
+        // ======================
+        // Table: Laporan
+        // ======================
+        Schema::create('laporan', function (Blueprint $table) {
+            $table->id('laporan_id');
+            
+            // $table->foreignId('magang_id')
+            //       ->constrained()
+            //       ->cascadeOnDelete()
+            //       ->unique(); 
+            $table->unsignedBigInteger('magang_id');
+            $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
+
+            $table->string('nama_file')->nullable(); 
+            $table->string('file_path');
+
+            $table->timestamps();
+        });
+
 
         // ======================
         // Table: jadwal_presentasi
@@ -102,7 +123,7 @@ return new class extends Migration {
         Schema::dropIfExists('foto_kegiatan');
         Schema::dropIfExists('logbook_magang');
         Schema::dropIfExists('jadwal_presentasi');
-        Schema::dropIfExists('dokumen_penilaian_mitra');
+        Schema::dropIfExists('penilaian_mitra');
         Schema::dropIfExists('dokumen_magang');
         Schema::dropIfExists('progress_magang');
         Schema::dropIfExists('penilaian_mitra');

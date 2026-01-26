@@ -37,19 +37,9 @@ class MahasiswaController extends Controller
             });
         }
 
-        // 🎓 Filter status aktif
-        if (!is_null($request->query('status_aktif'))) {
-            $query->where('status_aktif', $request->query('status_aktif'));
-        }
-
         // 🎓 Filter angkatan (tahun masuk)
         if ($angkatan = $request->query('angkatan')) {
             $query->where('angkatan', $angkatan);
-        }
-
-        // 🧭 Filter semester
-        if ($semester = $request->query('semester')) {
-            $query->where('semester', $semester);
         }
 
         // 🧭 Filter semester magang // draft
@@ -57,11 +47,6 @@ class MahasiswaController extends Controller
             $query->whereHas('magang', function ($q) use ($semester_magang) {
                 $q->where('semester_magang', $semester_magang);
             });
-        }
-
-        // 🏙️ Filter berdasarkan alamat (partial match)
-        if ($alamat = $request->query('alamat')) {
-            $query->where('alamat', 'like', "%{$alamat}%");
         }
 
         // 👤 Filter berdasarkan user_id
@@ -108,12 +93,6 @@ class MahasiswaController extends Controller
         $rules = [
             'nim' => ['required', 'string', 'max:50', 'unique:mahasiswa,nim'],
             'nama' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'no_hp' => ['nullable', 'string', 'max:30'],
-            'semester' => ['nullable', 'integer'],
-            'alamat' => ['nullable', 'string'],
-            'foto_profile' => ['nullable', 'image', 'max:2048'], // max 2MB
-            'status_aktif' => ['nullable', Rule::in([0, 1])],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -126,12 +105,6 @@ class MahasiswaController extends Controller
         }
 
         $data = $validator->validated();
-
-        // Tangani upload foto_profile jika ada
-        if ($request->hasFile('foto_profile')) {
-            $path = $request->file('foto_profile')->store('foto_profile', 'public');
-            $data['foto_profile'] = $path;
-        }
 
         // Pecah NIM format: YY/NIU/Fakultas/NIF
         $nimParts = explode("/", $data['nim']);
@@ -184,13 +157,7 @@ class MahasiswaController extends Controller
         $rules = [
             'nim' => ['required', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'no_hp' => ['nullable', 'string', 'max:30'],
             'angkatan' => ['nullable', 'integer'],
-            'semester' => ['nullable', 'integer'],
-            'alamat' => ['nullable', 'string'],
-            'foto_profile' => ['nullable', 'image', 'max:2048'],
-            'status_aktif' => ['nullable', Rule::in([0, 1])],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -203,19 +170,6 @@ class MahasiswaController extends Controller
         }
 
         $data = $validator->validated();
-
-        $user->update(['email' => $data['email']]);
-
-
-        // Tangani pergantian foto_profile
-        if ($request->hasFile('foto_profile')) {
-            // Hapus file lama jika ada
-            if (!empty($mahasiswa->foto_profile) && Storage::disk('public')->exists($mahasiswa->foto_profile)) {
-                Storage::disk('public')->delete($mahasiswa->foto_profile);
-            }
-            $path = $request->file('foto_profile')->store('foto_profile', 'public');
-            $data['foto_profile'] = $path;
-        }
 
         $mahasiswa->update($data);
 
@@ -231,11 +185,6 @@ class MahasiswaController extends Controller
     public function destroy($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-
-        // Hapus file foto_profile jika ada
-        if (!empty($mahasiswa->foto_profile) && Storage::disk('public')->exists($mahasiswa->foto_profile)) {
-            Storage::disk('public')->delete($mahasiswa->foto_profile);
-        }
 
         $mahasiswa->delete();
 
@@ -285,7 +234,7 @@ class MahasiswaController extends Controller
                 ['username' => $niu],
                 // data, if not found
                 [
-                    'email' => null, // email dummy unik
+                    'email' => null, 
                     'password' => Hash::make($nif), // password dari bagian akhir
                     'role' => "mahasiswa"
                 ]

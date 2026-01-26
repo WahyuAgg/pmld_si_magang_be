@@ -16,13 +16,10 @@ class DokumenMagang extends Model
         'nama_file',
         'path_file',
         'ukuran_file',
-        'status_dokumen',
-        'keterangan',
         'uploaded_at',
         'updated_at',
     ];
     protected $hidden = [
-        'created_at',
         'updated_at',
         'uploaded_at',
         'ukuran_file'

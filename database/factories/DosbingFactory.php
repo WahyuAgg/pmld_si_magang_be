@@ -18,11 +18,8 @@ class DosbingFactory extends Factory
     public function definition(): array
     {
         return [
-             'nip' => $this->faker->unique()->numerify('1980######'),
+            'nip' => $this->faker->unique()->numerify('1980######'),
             'nama' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'no_hp' => '08' . fake()->numerify('+62########'),
-            'jabatan' => $this->faker->randomElement(['Lektor', 'Asisten Ahli', 'Profesor']),
         ];
     }
 }

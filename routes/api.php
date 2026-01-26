@@ -106,7 +106,7 @@ Route::prefix('mitra')
 Route::prefix('magang')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(MagangController::class)->group(function () {
-        Route::get('/aktif/jumlah', 'jumlahMagangAktif');
+        // Route::get('/aktif/jumlah', 'jumlahMagangAktif');
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');
@@ -233,23 +233,6 @@ Route::prefix('penilaian-mitra')
     });
 
 
-
-/*
-|--------------------------------------------------------------------------
-| Supervisor Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('supervisor')
-    ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
-    ->controller(SupervisorController::class)
-    ->group(function () {
-        Route::get('/magang/{id}', 'getSupervisorByMagang');
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
 
 /**
  * -----------------------------------------------------------------------

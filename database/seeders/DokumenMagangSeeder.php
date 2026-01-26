@@ -27,9 +27,7 @@ class DokumenMagangSeeder extends Seeder
         }
         $dokumenTypes = [
             'doc_surat_penerimaan',
-            'doc_pra_krs',
-            'doc_laporan_magang',
-            'doc_penilaian_mitra'
+            'doc_pra_krs'
         ];
 
         $magangs = Magang::all();
@@ -60,10 +58,8 @@ class DokumenMagangSeeder extends Seeder
                     'magang_id'       => $magang->magang_id,
                     'jenis_dokumen'   => $type,
                     'nama_file'       => $namaFile,
-                    'path_file'       => '/storage/dokumen_magang/' . $namaFile,
+                    'file_path'       => '/storage/dokumen_magang/' . $namaFile,
                     'ukuran_file'     => Storage::exists($destFile) ? Storage::size($destFile) : rand(100, 1024) * 1024,
-                    'status_dokumen'  => 'draft',
-                    'keterangan'      => 'Dokumen ' . Str::title(str_replace('_', ' ', $type)),
                     'uploaded_at'     => now(),
                     'updated_at'      => now(),
                 ]);

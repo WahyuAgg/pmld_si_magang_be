@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NilaiMitra;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class NilaiMitraController extends Controller
@@ -80,7 +81,8 @@ class NilaiMitraController extends Controller
             'nilai_proyek_pengalaman_industri' => ['required', 'numeric', 'min:0', 'max:100'],
             'keterangan' => ['nullable', 'string'],
             'supervisor' => ['required', 'string'],
-            'jabatan_supervisor' => ['required', 'string']
+            'jabatan_supervisor' => ['required', 'string'],
+            'file' => ['required', 'file', 'max:5000']
         ]);
 
         if ($validator->fails()) {
@@ -90,7 +92,19 @@ class NilaiMitraController extends Controller
             ], 422);
         }
 
-        $nilaiMitra = NilaiMitra::create($validator->validated());
+        $file = $request->file('file');
+        $path = $file->store('dokumen-penilaian', 'public');
+        $namaFile = $file->getClientOriginalName();
+
+        $file = $request->file('file');
+        $path = $file->store('dokumen-penilaian', 'public');
+        $namaFile = $file->getClientOriginalName();
+
+        $data = $validator->validated();
+        $data['file_path'] = $path;
+        $data['nama_file'] = $namaFile;
+
+        $nilaiMitra = NilaiMitra::create($data);
 
         return response()->json([
             'message' => 'Penilaian mitra berhasil dibuat',
@@ -122,6 +136,7 @@ class NilaiMitraController extends Controller
             'nilai_komunikasi_presentasi' => ['sometimes', 'numeric', 'min:0', 'max:100'],
             'nilai_proyek_pengalaman_industri' => ['sometimes', 'numeric', 'min:0', 'max:100'],
             'keterangan' => ['nullable', 'string'],
+            'file' => ['sometimes', 'file', 'max:5000'],
         ]);
 
         if ($validator->fails()) {
@@ -131,7 +146,24 @@ class NilaiMitraController extends Controller
             ], 422);
         }
 
-        $nilaiMitra->update($validator->validated());
+        $data = $validator->validated();
+
+        // 🔁 Kalau file di-update
+        if ($request->hasFile('file')) {
+            // hapus file lama
+            if ($nilaiMitra->file_path) {
+                Storage::disk('public')->delete($nilaiMitra->file_path);
+            }
+
+            $file = $request->file('file');
+            $path = $file->store('dokumen-penilaian', 'public');
+            $namaFile = $file->getClientOriginalName();
+
+            $data['file_path'] = $path;
+            $data['nama_file'] = $namaFile;
+        }
+
+        $nilaiMitra->update($data);
 
         return response()->json([
             'message' => 'Penilaian mitra berhasil diperbarui',
@@ -139,12 +171,16 @@ class NilaiMitraController extends Controller
         ], 200);
     }
 
+
     /**
      * Hapus penilaian mitra.
      */
     public function destroy($id)
     {
         $nilaiMitra = NilaiMitra::findOrFail($id);
+        // tambahin hapus file terlebih dahulu
+        Storage::disk('public')->delete($nilaiMitra->file_path);
+
         $nilaiMitra->delete();
 
         return response()->json([

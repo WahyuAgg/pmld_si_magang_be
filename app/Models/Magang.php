@@ -17,26 +17,16 @@ class Magang extends Model
         'mitra_id',
         'supervisor_id',
         'dosbing_id',
-        'tahun_ajaran',
         'semester_magang', 
-        'jumlah_magang_ke',
         'role_magang',
         'jobdesk',
-        'tanggal_mulai',
-        'tanggal_selesai',
         'periode_bulan',
-        'status_magang',
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
-        'supervisor_id',
-        'status_magang',
-
     ];
-
-    // ✅ Tambahkan ini
     
     protected static function booted()
     {
@@ -58,11 +48,6 @@ class Magang extends Model
         return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
     }
 
-    public function supervisor()
-    {
-        return $this->belongsTo(Supervisor::class, 'supervisor_id', 'supervisor_id');
-    }
-
     public function dosenPembimbing()
     {
         return $this->belongsTo(Dosbing::class, 'dosbing_id', 'dosbing_id');
@@ -76,6 +61,11 @@ class Magang extends Model
     public function nilaiMitra()
     {
         return $this->hasOne(NilaiMitra::class, 'magang_id', 'magang_id');
+    }
+
+    public function laporan()
+    {
+        return $this->hasOne(Laporan::class);
     }
 
 

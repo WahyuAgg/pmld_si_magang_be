@@ -24,11 +24,6 @@ class DosbingController extends Controller
             $query->where('nama', 'like', "%{$search}%");
         }
 
-        // Filter berdasarkan jabatan
-        if ($jabatan = $request->query('jabatan')) {
-            $query->where('jabatan', $jabatan);
-        }
-
         $perPage = (int) $request->query('per_page', 15);
         $dosbing = $query->orderBy('dosbing_id')->paginate($perPage);
 
@@ -52,9 +47,6 @@ class DosbingController extends Controller
         $rules = [
             'nip' => ['required', 'string', 'max:30', 'unique:dosen_pembimbing,nip'],
             'nama' => ['required', 'string', 'max:150'],
-            'email' => ['nullable', 'email', 'unique:dosen_pembimbing,email'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
-            'jabatan' => ['nullable', 'string', 'max:100'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -83,9 +75,6 @@ class DosbingController extends Controller
         $rules = [
             'nip' => ['sometimes', 'required', 'string', 'max:30', 'unique:dosen_pembimbing,nip,' . $dosbing->dosbing_id . ',dosbing_id'],
             'nama' => ['sometimes', 'required', 'string', 'max:150'],
-            'email' => ['nullable', 'email', 'unique:dosen_pembimbing,email,' . $dosbing->dosbing_id . ',dosbing_id'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
-            'jabatan' => ['nullable', 'string', 'max:100'],
         ];
 
         $validator = Validator::make($request->all(), $rules);

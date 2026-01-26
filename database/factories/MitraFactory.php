@@ -17,13 +17,8 @@ class MitraFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama_perusahaan' => $this->faker->company,
-            'alamat' => $this->faker->address,
-            'no_telp' => '08' . $this->faker->numerify('##########'),
+            'nama_mitra' => $this->faker->company,
             'email' => $this->faker->unique()->companyEmail,
-            'website' => $this->faker->url,
-            'bidang_usaha' => $this->faker->randomElement(['IT', 'Manufaktur', 'Konsultan', 'Pendidikan']),
-            'deskripsi' => $this->faker->sentence(10),
         ];
     }
 }

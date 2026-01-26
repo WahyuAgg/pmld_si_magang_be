@@ -21,11 +21,9 @@ class MahasiswaSeeder extends Seeder
             for ($i = 1; $i <= 8; $i++) {
                 // 1. Buat user dulu
                 $user = User::create([
-                    'email' => "mhs{$angkatan}{$i}@example.com",
                     'username' => "mhs{$angkatan}{$i}",
                     'password' => Hash::make('password123'),
                     'role' => 'mahasiswa',
-                    'is_active' => true,
                 ]);
 
                 $faker = Faker::create();
@@ -36,13 +34,7 @@ class MahasiswaSeeder extends Seeder
                     'user_id' => $user->user_id,
                     'nim' => "NIM{$angkatan}" . str_pad($i, 3, '0', STR_PAD_LEFT),
                     'nama' => $faker->name, // contoh: "Budi Santoso" atau "Rina Anggraini"
-                    'email' => $user->email,
-                    'no_hp' => '08' . rand(111111111, 999999999),
                     'angkatan' => $angkatan,
-                    'semester' => ($angkatan == 2022 ? 6 : 5),
-                    'alamat' => "Alamat Mahasiswa {$angkatan}-{$i}",
-                    'foto_profile' => null,
-                    'status_aktif' => true,
                 ]);
 
                 $counter++;

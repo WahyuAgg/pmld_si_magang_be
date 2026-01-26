@@ -15,16 +15,10 @@ class Dosbing extends Model
     protected $fillable = [
         'nip',
         'nama',
-        'email',
-        'no_hp',
-        'jabatan',
     ];
     protected $hidden = [
         'created_at',
         'updated_at',
-        'email',
-        'no_hp',
-        'jabatan'
     ];
 
     // 🔗 Relasi
