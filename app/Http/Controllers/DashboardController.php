@@ -16,12 +16,12 @@ class DashboardController extends Controller
     public function fetchDashboardDataAdmin()
     {
         // 1. Hitung jumlah magang aktif berdasarkan tahun ajaran terbaru
-        $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
+        // $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
         $SemesterMagangTerbaru = Magang::latest('semester_magang')->value('semester_magang');
 
 
-        if ($tahunAjaranTerbaru) {
-            $jumlahMagangAktif = Magang::where('tahun_ajaran', $tahunAjaranTerbaru)
+        if ($SemesterMagangTerbaru) {
+            $jumlahMagangAktif = Magang::where('semester_magang', $SemesterMagangTerbaru)
                 // ->where('semester_magang', $SemesterMagangTerbaru)
                 ->count();
         } else {

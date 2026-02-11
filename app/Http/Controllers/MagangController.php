@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\DokumenMagang;
 use App\Models\Magang;
 use App\Models\Mitra;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 
@@ -104,6 +106,8 @@ class MagangController extends Controller
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
+            'dokumenPenerimaan' => 'required|file|mimes:pdf|max:5120',
+            'dokumenPraKRS' => 'required|file|mimes:pdf|max:5120'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -120,18 +124,41 @@ class MagangController extends Controller
         // Set mahasiswa_id dari user yang login
         $data['mahasiswa_id'] = $mahasiswa_id;
 
-        // Jika mitra baru, buat dulu
-        // if (!isset($data['mitra_id']) && isset($data['mitra_nama_baru'])) {
-        //     $mitra = Mitra::create([
-        //         'nama_mitra' => $data['mitra_nama_baru'],
-        //         'is_verified' => false,
-        //     ]);
-        //     $data['mitra_id'] = $mitra->mitra_id;
-        // }
+        // upload penerimaan
+        $filePenerimaan = $request->file('dokumenPenerimaan');
+        $namePenerimaan = $filePenerimaan->getClientOriginalName();
+        $fileNamePenerimaan = $namePenerimaan . "_" . time();
+        $pathPenerimaan = $filePenerimaan->storeAs("dokumen-penerimaan/{$mahasiswa_id}", $fileNamePenerimaan, 'public');
 
-        // unset($data['mitra_nama_baru']);
+        // upload pra KRS
+        $filePraKrs = $request->file('dokumenPraKRS');
+        $namaPraKRS = $filePraKrs->getClientOriginalName();
+        $fileNamePraKRS = $namaPraKRS . "_" . time();
+        $pathPraKrs = $filePraKrs->storeAs("dokumen-pra-krs/{$mahasiswa_id}", $fileNamePraKRS, 'public');
 
+        // create magang dulu
+        unset($data['dokumenPenerimaan'], $data['dokumenPraKRS']);
         $magang = Magang::create($data);
+
+        // insert ke dokumen_magang (2 record)
+
+        DokumenMagang::create([
+            'magang_id' => $magang->magang_id,
+            'jenis_dokumen' => 'doc_surat_penerimaan',
+            'file_path' => $pathPenerimaan,
+            'nama_file' => $namePenerimaan,
+            'ukuran_file' => $filePenerimaan->getSize()
+        ]);
+
+        DokumenMagang::create([
+            'magang_id' => $magang->magang_id,
+            'jenis_dokumen' => 'doc_pra_krs',
+            'file_path' => $pathPraKrs,
+            'nama_file' => $namaPraKRS,
+            'ukuran_file' => $filePraKrs->getSize()
+        ]);
+
+
 
         return response()->json([
             'message' => 'Data magang berhasil dibuat',
@@ -144,7 +171,7 @@ class MagangController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $magang = Magang::findOrFail($id);
+        $magang = Magang::with('dokumenMagang')->findOrFail($id);
 
         $rules = [
             'mahasiswa_id' => ['sometimes', 'exists:mahasiswa,mahasiswa_id'],
@@ -154,6 +181,10 @@ class MagangController extends Controller
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
+
+            // dokumen opsional saat update
+            'dokumenPenerimaan' => 'sometimes|file|mimes:pdf|max:5048',
+            'dokumenPraKRS' => 'sometimes|file|mimes:pdf|max:5048',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -167,27 +198,96 @@ class MagangController extends Controller
 
         $data = $validator->validated();
 
-        $magang->update($data);
+
+        // update magang
+        $magang->update(collect($data)->except([
+            'dokumenPenerimaan',
+            'dokumenPraKRS'
+        ])->toArray());
+
+        // update dokumen
+        if ($request->hasFile('dokumenPenerimaan')) {
+
+            $file = $request->file('dokumenPenerimaan');
+            $path = $file->store('dokumen-penerimaan', 'public');
+
+            $magang->dokumenMagang()
+                ->updateOrCreate(
+                    ['jenis_dokumen' => 'penerimaan'],
+                    [
+                        'file_path' => $path,
+                        'nama_file' => $file->getClientOriginalName()
+                    ]
+                );
+        }
+
+        // PRA KRS
+        if ($request->hasFile('dokumenPraKRS')) {
+
+            $file = $request->file('dokumenPraKRS');
+            $path = $file->store('dokumen-pra-krs', 'public');
+
+            $magang->dokumenMagang()
+                ->updateOrCreate(
+                    ['jenis_dokumen' => 'pra_krs'],
+                    [
+                        'file_path' => $path,
+                        'nama_file' => $file->getClientOriginalName()
+                    ]
+                );
+        }
 
         return response()->json([
             'message' => 'Data magang berhasil diperbarui',
-            'data' => $magang->fresh()->load(['mahasiswa', 'mitra', 'dosenPembimbing'])
+            'data' => $magang->fresh()->load([
+                'mahasiswa',
+                'mitra',
+                'dosenPembimbing',
+                'dokumenMagang'
+            ])
         ], 200);
     }
 
     /**
      * Hapus data magang.
      */
+
+
     public function destroy($id)
     {
-        $magang = Magang::findOrFail($id);
+        DB::transaction(function () use ($id) {
 
-        $magang->delete();
+            $magang = Magang::with('dokumenMagang')->findOrFail($id);
+
+            // ======================
+            // HAPUS FILE DARI STORAGE
+            // ======================
+
+            foreach ($magang->dokumenMagang as $dokumen) {
+
+                if ($dokumen->file_path && Storage::disk('public')->exists($dokumen->file_path)) {
+                    Storage::disk('public')->delete($dokumen->file_path);
+                }
+            }
+
+            // ======================
+            // HAPUS DATA DOKUMEN
+            // ======================
+
+            $magang->dokumenMagang()->delete();
+
+            // ======================
+            // HAPUS DATA MAGANG
+            // ======================
+
+            $magang->delete();
+        });
 
         return response()->json([
-            'message' => 'Data magang berhasil dihapus'
+            'message' => 'Data magang berhasil dihapus beserta dokumennya'
         ], 200);
     }
+
 
     /**
      * Menghitung jumlah mahasiswa yang sedang magang (status: berlangsung)

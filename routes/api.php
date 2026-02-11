@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AngkatanController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,7 @@ Route::prefix('user')
     ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa,mitra,dosbing'])
     ->controller(UserController::class)->group(function () {
         Route::get('/', 'getUser');
+        Route::put('/password', 'password');
         // Route::post('/', 'store');
         // Route::get('/{id}', 'show');
         // Route::put('/{id}', 'update');
@@ -72,11 +74,11 @@ Route::prefix('mahasiswa')
         Route::post('/update', 'update');
         Route::get('/', 'index');
         Route::post('/', 'store');
-        Route::get('/{id}', 'show');
+        Route::get('/show', 'show');
         Route::delete('/{id}', 'destroy');
 
         // Custom
-        Route::post('import/', 'import');
+        Route::post('/import', 'import');
     });
 
 
@@ -92,7 +94,7 @@ Route::prefix('mitra')
         Route::get('/magang/{id}', 'getMitraByMagang');
         Route::get('/', 'index');
         Route::post('/', 'store');
-        Route::get('/{id}', 'show');
+        Route::get('/show', 'show');
         Route::put('/{id}', 'update');
         Route::delete('/{id}', 'destroy');
     });
@@ -261,4 +263,21 @@ Route::prefix('dashboard')
         Route::get('/admin', 'fetchDashboardDataAdmin');
         Route::get('/mitra', 'fetchDashboardDataMitra');
         Route::get('/mahasiswa', 'fetchDashboardDataMahasiswa');
+    });
+
+
+/**
+ * -----------------------------------------------------------------------
+ * Laporan Routes
+ * -----------------------------------------------------------------------
+ */
+Route::prefix('laporan')
+    ->middleware(['auth.api:sanctum', 'role:admin,mahasiswa'])
+    ->controller(LaporanController::class)
+    ->group(function(){
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
     });

@@ -6,17 +6,21 @@ use App\Models\Laporan;
 use App\Models\Magang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class LaporanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user(); 
+        $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
+
         $laporan = Laporan::with('magang')
-            ->whereHas('magang', function ($q) {
-                $q->where('mahasiswa_id', auth()->id());
+            ->whereHas('magang', function ($q) use ($mahasiswa_id){
+                $q->where('mahasiswa_id', $mahasiswa_id);
             })
             ->get();
 
@@ -36,30 +40,41 @@ class LaporanController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'magang_id' => 'required|exists:magangs,id',
-            'file'      => 'required|file|mimes:pdf|max:2048',
-        ]);
+        $rules = [
+            'magang_id' => 'required|exists:magang,magang_id',
+            'file'      => 'required|file|mimes:pdf|max:5048',
+        ];
 
-        $magang = Magang::where('magang_id', $request->magang_id)
-            ->where('mahasiswa_id', auth()->id())
-            ->firstOrFail();
+        $validator = Validator::make($request->all(), $rules);
 
-        // 🔒 Guard bisnis
-        if ($magang->laporan) {
+        if ($validator->fails()) {
             return response()->json([
-                'message' => 'Laporan magang sudah ada'
-            ], 409);
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
+        // $magang = Magang::where('magang_id', $request->magang_id)
+        //     ->where('mahasiswa_id', auth()->id())
+        //     ->firstOrFail();
+
+        // // 🔒 Guard bisnis
+        // if ($magang->laporan) {
+        //     return response()->json([
+        //         'message' => 'Laporan magang sudah ada'
+        //     ], 409);
+        // }
+
+        $magang_id= $request->magang_id;
         $file     = $request->file('file');
-        $path     = $file->store('laporan-magang', 'public');
         $namaFile = $file->getClientOriginalName();
+        $fileName = $namaFile . "_" . time();
+        $path     = $file->storeAs("laporan-magang/{$magang_id}", $fileName, 'public');
 
         $laporan = Laporan::create([
-            'magang_id' => $magang->id,
+            'magang_id' => $magang_id,
             'file_path' => $path,
-            'nama_fifle' => $namaFile,
+            'nama_file' => $namaFile,
         ]);
 
         return response()->json([
@@ -95,7 +110,7 @@ class LaporanController extends Controller
     public function update(Request $request, string $magangId)
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf|max:2048',
+            'file' => 'required|file|mimes:pdf|max:5048',
         ]);
 
         $laporan = Laporan::whereHas('magang', function ($q) use ($magangId) {

@@ -37,10 +37,11 @@ class MitraController extends Controller
     /**
      * Tampilkan detail mitra berdasarkan id (mitra_id).
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $mitra = Mitra::with(['magang'])->findOrFail($id);
-
+        $user = $request->user();
+        $mitra_id = optional($user->mitra)->mitra_id;
+        $mitra = Mitra::findOrFail($mitra_id);
 
         return response()->json($mitra, 200);
     }

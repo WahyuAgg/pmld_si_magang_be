@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Mahasiswa;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,7 @@ class MahasiswaController extends Controller
         $mahasiswaId = optional($user->mahasiswa)->mahasiswa_id; // gunakan optional agar aman
 
         // Filter otomatis jika role adalah mahasiswa
-        if ($user->role === 'mahasiswa'&& $mahasiswaId) {
+        if ($user->role === 'mahasiswa' && $mahasiswaId) {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
             $query->where('mahasiswa_id', $mahasiswaId);
         }
@@ -74,16 +75,24 @@ class MahasiswaController extends Controller
         return response()->json($mahasiswa, 200);
     }
 
+    public function show(Request $request) {
+        $user = $request->user();
+        $mahasiswa_id = optional($user->mahasiswa)->mahasiswa_id;
+        $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
+
+        return response()->json($mahasiswa, 200);
+    }
+
 
     /**
      * Tampilkan detail mahasiswa berdasarkan id (mahasiswa_id).
      */
-    public function show($id)
-    {
-        $mahasiswa = Mahasiswa::with(['user', 'magang'])->findOrFail($id);
+    // public function show($id)
+    // {
+    //     $mahasiswa = Mahasiswa::with(['user', 'magang'])->findOrFail($id);
 
-        return response()->json($mahasiswa, 200);
-    }
+    //     return response()->json($mahasiswa, 200);
+    // }
 
     /**
      * Simpan mahasiswa baru.
@@ -148,13 +157,9 @@ class MahasiswaController extends Controller
      */
     public function update(Request $request)
     {
-
-        $user = auth()->user();
-        $userId = auth()->user()->user_id;
-
-        $mahasiswa = Mahasiswa::where('user_id', $userId)->firstOrFail();
-
+        // Validasi termasuk mahasiswa_id
         $rules = [
+            'mahasiswa_id' => ['required', 'integer', 'exists:mahasiswa,mahasiswa_id'],
             'nim' => ['required', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:255'],
             'angkatan' => ['nullable', 'integer'],
@@ -171,6 +176,13 @@ class MahasiswaController extends Controller
 
         $data = $validator->validated();
 
+        // Cari mahasiswa berdasarkan mahasiswa_id yang dikirim
+        $mahasiswa = Mahasiswa::findOrFail($data['mahasiswa_id']);
+
+        // Hapus mahasiswa_id dari data yang akan diupdate
+        unset($data['mahasiswa_id']);
+
+        // Update data mahasiswa
         $mahasiswa->update($data);
 
         return response()->json([
@@ -194,72 +206,138 @@ class MahasiswaController extends Controller
     }
 
 
-
-
     public function import(Request $request)
     {
-        // Validasi file CSV
         $request->validate([
             'file' => 'required|mimes:csv,txt',
         ]);
 
         $file = $request->file('file');
-
-        // Buka file
         $handle = fopen($file->getRealPath(), "r");
-
-        // Lewati header (No;Nama;NIM)
         $header = fgetcsv($handle, 1000, ";");
 
+        $errors = [];
         $imported = [];
-        while (($row = fgetcsv($handle, 1000, ";")) !== false) {
-            [$no, $nama, $nim] = $row;
+        $lineNumber = 1;
 
-            // Pecah NIM jadi bagian-bagian
-            $nimParts = explode("/", $nim);
+        // MULAI TRANSACTION
+        DB::beginTransaction();
 
-            // Pastikan format NIM sesuai (4 bagian)
-            if (count($nimParts) !== 4) {
-                continue; // skip data kalau NIM format tidak sesuai
-            }
+        try {
+            while (($row = fgetcsv($handle, 1000, ";")) !== false) {
+                $lineNumber++;
 
-            $angkatan = "20" . $nimParts[0]; // "23" -> "2023"
-            $niu = $nimParts[1];
-            $kodeFakultas = $nimParts[2];
-            $nif = $nimParts[3];
+                if (count($row) < 3) {
+                    $errors[] = "Baris ke-{$lineNumber}: Data tidak lengkap";
+                    continue;
+                }
 
-            // Buat user baru atau skip jika sudah ada
-            $user = User::firstOrCreate(
-                // where
-                ['username' => $niu],
-                // data, if not found
-                [
-                    'email' => null, 
-                    'password' => Hash::make($nif), // password dari bagian akhir
-                    'role' => "mahasiswa"
-                ]
-            );
+                [$no, $nama, $nim] = $row;
 
-            $mahasiswa = Mahasiswa::firstOrCreate(
-                ['nim' => $nim],
-                [
-                    'user_id' => $user->user_id,
+                if (empty($nim)) {
+                    $errors[] = "Baris ke-{$lineNumber}: NIM tidak boleh kosong";
+                    continue;
+                }
+
+                if (empty($nama)) {
+                    $errors[] = "Baris ke-{$lineNumber}: Nama tidak boleh kosong";
+                    continue;
+                }
+
+                $nimParts = explode("/", $nim);
+
+                if (count($nimParts) !== 4) {
+                    $errors[] = "Baris ke-{$lineNumber}: Format NIM tidak sesuai (harus XX/XXXXX/XX/XXXXX), ditemukan: {$nim}";
+                    continue;
+                }
+
+                [$tahun, $niu, $kodeFakultas, $nif] = $nimParts;
+
+                if (!ctype_digit($tahun) || strlen($tahun) !== 2) {
+                    $errors[] = "Baris ke-{$lineNumber}: Tahun angkatan harus 2 digit angka, ditemukan: {$tahun}";
+                    continue;
+                }
+
+                if (!ctype_digit($niu)) {
+                    $errors[] = "Baris ke-{$lineNumber}: NIU harus berupa angka, ditemukan: {$niu}";
+                    continue;
+                }
+
+                if (strlen($kodeFakultas) !== 2 || !ctype_alpha($kodeFakultas)) {
+                    $errors[] = "Baris ke-{$lineNumber}: Kode fakultas harus 2 huruf, ditemukan: {$kodeFakultas}";
+                    continue;
+                }
+
+                if (!ctype_digit($nif)) {
+                    $errors[] = "Baris ke-{$lineNumber}: NIF harus berupa angka, ditemukan: {$nif}";
+                    continue;
+                }
+
+                $angkatan = "20" . $tahun;
+
+                if ($angkatan < 2000 || $angkatan > 2030) {
+                    $errors[] = "Baris ke-{$lineNumber}: Tahun angkatan tidak valid: {$angkatan}";
+                    continue;
+                }
+
+                $user = User::firstOrCreate(
+                    ['username' => $niu],
+                    [
+                        'email' => null,
+                        'password' => Hash::make($nif),
+                        'role' => "mahasiswa"
+                    ]
+                );
+
+                $mahasiswa = Mahasiswa::firstOrCreate(
+                    ['nim' => $nim],
+                    [
+                        'user_id' => $user->user_id,
+                        'nama' => $nama,
+                        'angkatan' => $angkatan
+                    ]
+                );
+
+                $imported[] = [
+                    'nim' => $nim,
                     'nama' => $nama,
                     'angkatan' => $angkatan
+                ];
+            }
 
-                ]
+            fclose($handle);
 
-            );
+            // Jika ada error, ROLLBACK (batalkan semua perubahan database)
+            if (!empty($errors)) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Import gagal',
+                    'errors' => $errors,
+                    'imported_count' => 0,
+                    'failed_count' => count($errors)
+                ], 422);
+            }
 
-            $imported[] = $user;
+            // Jika tidak ada error, COMMIT (simpan semua perubahan)
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Import berhasil',
+                'data' => $imported,
+                'imported_count' => count($imported),
+                'failed_count' => 0
+            ]);
+
+        } catch (\Exception $e) {
+            // Jika ada error tidak terduga, rollback juga
+            DB::rollBack();
+            fclose($handle);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat import',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        fclose($handle);
-
-        return response()->json([
-            'message' => 'Import berhasil',
-            'data' => $imported,
-        ]);
     }
 
 }

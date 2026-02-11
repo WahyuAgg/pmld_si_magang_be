@@ -92,13 +92,11 @@ class NilaiMitraController extends Controller
             ], 422);
         }
 
+        $magang_id = $request->magang_id;
         $file = $request->file('file');
-        $path = $file->store('dokumen-penilaian', 'public');
         $namaFile = $file->getClientOriginalName();
-
-        $file = $request->file('file');
-        $path = $file->store('dokumen-penilaian', 'public');
-        $namaFile = $file->getClientOriginalName();
+        $fileName = $namaFile . "_" . time();
+        $path = $file->storeAs("dokumen-penilaian/{$magang_id}", $fileName, 'public');
 
         $data = $validator->validated();
         $data['file_path'] = $path;
