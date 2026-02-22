@@ -92,9 +92,8 @@ return new class extends Migration {
         Schema::create('logbook', function (Blueprint $table) {
             $table->id('logbook_id');
             $table->unsignedBigInteger('magang_id');
-            $table->date('tanggal_kegiatan');
             $table->text('kegiatan');
-            $table->text('deskripsi_kegiatan')->nullable();
+            
             $table->timestamps();
 
             $table->unique(['logbook_id', 'magang_id']);
@@ -110,9 +109,9 @@ return new class extends Migration {
             $table->id('foto_id');
             $table->unsignedBigInteger('logbook_id');
             $table->string('nama_file', 255);
-            $table->string('path_file', 500);
-            $table->string('keterangan', 255)->nullable();
-            $table->timestamp('uploaded_at')->useCurrent();
+            $table->string('file_path', 500);
+            // $table->string('keterangan', 255)->nullable();
+            $table->timestamps();
 
             $table->foreign('logbook_id')->references('logbook_id')->on('logbook');
         });

@@ -11,9 +11,7 @@ class Logbook extends Model
 
     protected $fillable = [
         'magang_id',
-        'tanggal_kegiatan',
         'kegiatan',
-        'deskripsi_kegiatan',
     ];
 
     protected $hidden = [

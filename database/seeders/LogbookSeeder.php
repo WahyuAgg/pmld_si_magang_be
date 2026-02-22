@@ -21,9 +21,7 @@ class LogbookSeeder extends Seeder
             for ($i = 0; $i < $jumlahLog; $i++) {
                 Logbook::create([
                     'magang_id' => $magang->magang_id,
-                    'tanggal_kegiatan' => Carbon::now()->subDays(rand(1, 60)),
                     'kegiatan' => "Kegiatan ke-" . ($i + 1),
-                    'deskripsi_kegiatan' => "Deskripsi kegiatan ke-" . ($i + 1) . " untuk magang ID " . $magang->magang_id,
                 ]);
             }
         }

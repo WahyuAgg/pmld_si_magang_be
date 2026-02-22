@@ -20,9 +20,7 @@ class LogbookMagangFactory extends Factory
     {
         return [
             'magang_id' => Magang::factory(),
-            'tanggal_kegiatan' => $this->faker->date(),
             'kegiatan' => $this->faker->sentence(6),
-            'deskripsi_kegiatan' => $this->faker->paragraph(2),
         ];
     }
 }

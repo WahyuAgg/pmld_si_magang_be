@@ -8,19 +8,16 @@ class FotoMagang extends Model
 {
     protected $table = 'foto_kegiatan';
     protected $primaryKey = 'foto_id';
-    public $timestamps = false; // pakai uploaded_at, bukan created_at/updated_at
 
     protected $fillable = [
         'logbook_id',
         'nama_file',
-        'path_file',
+        'file_path',
         'keterangan',
-        'uploaded_at',
     ];
     protected $hidden = [
         'created_at',
-        'updated_at',
-        'uploaded_at'
+        'updated_at'
     ];
 
     // Relasi: FotoKegiatan belongsTo LogbookMagang
