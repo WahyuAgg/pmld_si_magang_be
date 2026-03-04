@@ -12,7 +12,7 @@ return new class extends Migration {
         // ======================
         Schema::create('penilaian_mitra', function (Blueprint $table) {
             $table->id('penilaian_id');
-            $table->unsignedBigInteger('magang_id');
+            $table->unsignedBigInteger('magang_id')->unique();
             $table->decimal('nilai_teknis', 5, 2);
             $table->decimal('nilai_profesionalisme_etika', 5, 2);
             $table->decimal('nilai_komunikasi_presentasi', 5, 2);
@@ -20,12 +20,11 @@ return new class extends Migration {
             $table->text('keterangan')->nullable();
             $table->string('supervisor', 255);
             $table->string('jabatan_supervisor', 255);
-            // TODO jangan lupa hapus bang nullable nya
-            $table->string('nama_file')->nullable();
-            $table->string('file_path')->nullable();
+            $table->string('nama_file');
+            $table->string('file_path');
             $table->timestamps();
 
-            $table->foreign('magang_id')->references('magang_id')->on('magang');
+            $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
         });
 
 
@@ -46,22 +45,16 @@ return new class extends Migration {
 
         });
 
+
         // ======================
         // Table: Laporan
         // ======================
         Schema::create('laporan', function (Blueprint $table) {
             $table->id('laporan_id');
-            
-            // $table->foreignId('magang_id')
-            //       ->constrained()
-            //       ->cascadeOnDelete()
-            //       ->unique(); 
-            $table->unsignedBigInteger('magang_id');
+            $table->unsignedBigInteger('magang_id')->unique();
             $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
-
             $table->string('nama_file')->nullable(); 
             $table->string('file_path');
-
             $table->timestamps();
         });
 
@@ -71,7 +64,6 @@ return new class extends Migration {
         // ======================
         Schema::create('jadwal_presentasi', function (Blueprint $table) {
             $table->id('jadwal_id');
-            // $table->unsignedBigInteger('magang_id')->nullable();
             $table->date('tanggal_presentasi')->nullable();
             $table->string('waktu_mulai', 20)->nullable();
             $table->string('waktu_selesai', 20)->nullable();
@@ -80,27 +72,21 @@ return new class extends Migration {
             $table->text('keterangan')->nullable();
             $table->enum('status', ['terjadwal', 'selesai', 'dibatalkan'])->default('terjadwal');
             $table->timestamps();
-
-            // $table->unique(['jadwal_id', 'magang_id']);
-
-            // $table->foreign('magang_id')->references('magang_id')->on('magang');
         });
+
 
         // ======================
         // Table: logbook_magang
         // ======================
         Schema::create('logbook', function (Blueprint $table) {
             $table->id('logbook_id');
-            $table->unsignedBigInteger('magang_id');
+            $table->unsignedBigInteger('magang_id')->unique();
             $table->text('kegiatan');
-            
             $table->timestamps();
 
-            $table->unique(['logbook_id', 'magang_id']);
-
-            $table->foreign('magang_id')->references('magang_id')->on('magang');
-
+            $table->foreign('magang_id')->references('magang_id')->on('magang')->onDelete('cascade');
         });
+
 
         // ======================
         // Table: foto_kegiatan
@@ -110,21 +96,19 @@ return new class extends Migration {
             $table->unsignedBigInteger('logbook_id');
             $table->string('nama_file', 255);
             $table->string('file_path', 500);
-            // $table->string('keterangan', 255)->nullable();
             $table->timestamps();
 
-            $table->foreign('logbook_id')->references('logbook_id')->on('logbook');
+            $table->foreign('logbook_id')->references('logbook_id')->on('logbook')->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('foto_kegiatan');
-        Schema::dropIfExists('logbook_magang');
-        Schema::dropIfExists('jadwal_presentasi');
         Schema::dropIfExists('penilaian_mitra');
         Schema::dropIfExists('dokumen_magang');
-        Schema::dropIfExists('progress_magang');
-        Schema::dropIfExists('penilaian_mitra');
+        Schema::dropIfExists('laporan');
+        Schema::dropIfExists('jadwal_presentasi');
+        Schema::dropIfExists('logbook');
+        Schema::dropIfExists('foto_kegiatan');
     }
 };

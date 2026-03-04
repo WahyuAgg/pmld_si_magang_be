@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Logbook extends Model
 {
@@ -18,14 +19,21 @@ class Logbook extends Model
         'created_at',
         'updated_at'
     ];
+
+    protected static function booted()
+    {
+        static::deleting(function ($logbook) {
+            foreach ($logbook->fotoKegiatan as $foto) {
+                Storage::delete($foto->file_path);
+            }
+        });
+    }
     
-    // Relasi: LogbookMagang belongsTo Magang
     public function magang()
     {
         return $this->belongsTo(Magang::class, 'magang_id', 'magang_id');
     }
 
-    // Relasi: LogbookMagang hasMany FotoKegiatan
     public function fotoKegiatan()
     {
         return $this->hasMany(FotoMagang::class, 'logbook_id', 'logbook_id');

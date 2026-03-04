@@ -53,44 +53,52 @@ class MitraController extends Controller
     {
         $rules = [
             'nama_mitra' => ['required', 'string', 'max:255', 'unique:mitra,nama_mitra'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
             'narahubung' => ['nullable', 'string'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'nama_mitra.unique' => 'Mitra dengan nama tersebut sudah ada',
+            'email.email' => 'Format email tidak valid',
+        ];
 
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'title' => 'Validasi Gagal',
+                'message' => collect($validator->errors()->all())->first(),
             ], 422);
         }
 
-        $data = $validator->validated();
+        try {
+            $data = $validator->validated();
 
-        $username = Str::before($data['email'], '@');
+            $username = Str::before($data['email'], '@');
 
+            $user = User::firstOrCreate(
+                ['email' => $data['email']],
+                [
+                    'email' => $data['email'],
+                    'username' => $username,
+                    'password' => $username,
+                    'role' => 'mitra',
+                ]
+            );
 
-        $user = User::firstOrCreate(
-            ['email' => $data['email']],
-            [
-                'email' => $data['email'],
-                'username' => $username,
-                'password' => $username,
-                'role' => 'mitra'
-            ]
-        );
+            $data['user_id'] = $user->user_id;
 
-        $data['user_id'] = $user->user_id;
+            $mitra = Mitra::create($data);
 
-        $mitra = Mitra::create($data);
+            return response()->json([
+                'message' => 'Mitra berhasil dibuat',
+                'data' => $mitra,
+            ], 201);
 
-
-
-        return response()->json([
-            'message' => 'Mitra berhasil dibuat',
-            'data' => $mitra->load(['user'])
-        ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -98,36 +106,43 @@ class MitraController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $mitra = Mitra::findOrFail($id);
-
         $rules = [
-            'nama_mitra' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('mitra', 'nama_mitra')->ignore($mitra->mitra_id, 'mitra_id')
-            ],
-            'email' => ['nullable', 'email', 'max:255'],
+            'nama_mitra' => ['required', 'string', 'max:255', 'unique:mitra,nama_mitra,' . $id . ',mitra_id'],
+            'email' => ['required', 'email', 'max:255'],
             'narahubung' => ['nullable', 'string'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'nama_mitra.unique' => 'Mitra dengan nama tersebut sudah ada',
+            'email.email' => 'Format email tidak valid',
+        ];
 
-        if ($validator->fails()) {
+        try {
+            $mitra = Mitra::findOrFail($id);
+            $validator = Validator::make($request->all(), $rules, $messages);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'title' => "Validasi Gagal",
+                    'message' => collect($validator->errors()->all())->first(),
+                ], 422);
+            }
+    
+            $data = $validator->validated();
+    
+            $mitra->update($data);
+    
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Mitra berhasil diperbarui',
+                'data' => $mitra->fresh()->load(['magang'])
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
         }
 
-        $data = $validator->validated();
-
-        $mitra->update($data);
-
-        return response()->json([
-            'message' => 'Mitra berhasil diperbarui',
-            'data' => $mitra->fresh()->load(['magang'])
-        ], 200);
     }
 
     /**

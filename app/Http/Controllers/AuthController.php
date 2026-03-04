@@ -58,7 +58,7 @@ class AuthController extends Controller
 
         // Coba login dengan username
         if (!Auth::attempt($request->only('username', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Username atau password salah'], 401);
         }
 
         $user = $request->user();

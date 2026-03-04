@@ -110,8 +110,10 @@ Route::prefix('magang')
     ->controller(MagangController::class)->group(function () {
         // Route::get('/aktif/jumlah', 'jumlahMagangAktif');
         Route::get('/', 'index');
+        Route::get('/export/excel',  'exportExcel');
         Route::post('/', 'store');
         Route::get('/{id}', 'show');
+        Route::get('/{id}/detail', 'showDetail');
         Route::put('/{id}', 'update');
         Route::delete('/{id}', 'destroy');
     });

@@ -1,9 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Exports\MagangExport;
 use App\Models\DokumenMagang;
+use App\Models\Laporan;
+use App\Models\Logbook;
 use App\Models\Magang;
 use App\Models\Mitra;
+use App\Models\NilaiMitra;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +16,7 @@ use Illuminate\Validation\Rule;
 
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MagangController extends Controller
 {
@@ -60,17 +66,17 @@ class MagangController extends Controller
         if ($penilaian = $request->query('penilaian')) {
             if ($penilaian === 'none') {
                 // Magang yang BELUM ada penilaian mitra
-                $query->whereDoesntHave('nilaiMitra');
+                $query->whereDoesntHave('penilaianMitra');
             } elseif ($penilaian === 'exist') {
                 // Magang yang SUDAH ada penilaian mitra
-                $query->whereHas('nilaiMitra');
+                $query->whereHas('penilaianMitra');
             }
         }
 
 
-        // $perPage = (int) $request->query('per_page', 15);
-        // $magang = $query->orderByDesc('tanggal_mulai')->paginate($perPage);
-        $magang = $query->get();
+        $perPage = (int) $request->query('per_page', 10);
+        $magang = $query->paginate($perPage);
+        // $magang = $query->get();
 
         // return response()->json([$user, $mahasiswa], 200);
 
@@ -121,7 +127,6 @@ class MagangController extends Controller
 
         $data = $validator->validated();
 
-        // Set mahasiswa_id dari user yang login
         $data['mahasiswa_id'] = $mahasiswa_id;
 
         // upload penerimaan
@@ -253,39 +258,68 @@ class MagangController extends Controller
      */
 
 
+    // Controller - bersih
     public function destroy($id)
     {
-        DB::transaction(function () use ($id) {
+        try {
+            DB::transaction(function () use ($id) {
+                $magang = Magang::findOrFail($id);
+                $magang->delete();
+            });
+    
+            return response()->json([
+                'message' => 'Data magang berhasil dihapus'
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
 
-            $magang = Magang::with('dokumenMagang')->findOrFail($id);
+    public function showDetail($id)
+    {
+        $magang = Magang::with(['mahasiswa', 'mitra', 'dosenPembimbing'])
+            ->findOrFail($id);
 
-            // ======================
-            // HAPUS FILE DARI STORAGE
-            // ======================
+        // Logbook
+        $logbook = Logbook::with('fotoKegiatan')
+            ->where('magang_id', $id)
+            ->orderByDesc('logbook_id')
+            ->get();
 
-            foreach ($magang->dokumenMagang as $dokumen) {
+        // Penilaian mitra (ambil first karena per magang biasanya satu)
+        $penilaian = NilaiMitra::where('magang_id', $id)->first();
 
-                if ($dokumen->file_path && Storage::disk('public')->exists($dokumen->file_path)) {
-                    Storage::disk('public')->delete($dokumen->file_path);
-                }
-            }
+        // Dokumen magang (hanya penerimaan & pra-krs)
+        $dokumen = DokumenMagang::where('magang_id', $id)
+            ->whereIn('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs'])
+            ->orderByDesc('dokumen_id')
+            ->get();
 
-            // ======================
-            // HAPUS DATA DOKUMEN
-            // ======================
-
-            $magang->dokumenMagang()->delete();
-
-            // ======================
-            // HAPUS DATA MAGANG
-            // ======================
-
-            $magang->delete();
-        });
+        // Laporan magang
+        $laporan = Laporan::where('magang_id', $id)
+            ->get();
 
         return response()->json([
-            'message' => 'Data magang berhasil dihapus beserta dokumennya'
+            'detail' => $magang,
+            'logbook' => $logbook,
+            'penilaian' => $penilaian,
+            'dokumen' => $dokumen,
+            'laporan' => $laporan,
         ], 200);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $angkatan = $request->query('angkatan');
+        $semesterMagang = $request->query('semester_magang');
+
+        $fileName = "data-magang-" . $angkatan . "-" . $semesterMagang . "-" . Carbon::now()->format('ymdHi');
+        $fileName .= '.xlsx';
+
+        return Excel::download(new MagangExport($angkatan, $semesterMagang), $fileName);
     }
 
 

@@ -24,13 +24,11 @@ class MahasiswaController extends Controller
         $user = $request->user(); // ambil user dari token
         $mahasiswaId = optional($user->mahasiswa)->mahasiswa_id; // gunakan optional agar aman
 
-        // Filter otomatis jika role adalah mahasiswa
         if ($user->role === 'mahasiswa' && $mahasiswaId) {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
             $query->where('mahasiswa_id', $mahasiswaId);
         }
 
-        // 🔍 Pencarian global (nama atau NIM)
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
@@ -38,44 +36,28 @@ class MahasiswaController extends Controller
             });
         }
 
-        // 🎓 Filter angkatan (tahun masuk)
         if ($angkatan = $request->query('angkatan')) {
             $query->where('angkatan', $angkatan);
         }
 
-        // 🧭 Filter semester magang // draft
         if ($semester_magang = $request->get('semester_magang')) {
             $query->whereHas('magang', function ($q) use ($semester_magang) {
                 $q->where('semester_magang', $semester_magang);
             });
         }
 
-        // 👤 Filter berdasarkan user_id
-        if ($userId = $request->query('user_id')) {
-            $query->where('user_id', $userId);
-        }
-
-        // 📅 Filter range angkatan (contoh: 2020-2023)
-        // if ($range = $request->query('angkatan_range')) {
-        //     [$from, $to] = explode('-', $range);
-        //     $query->whereBetween('angkatan', [(int) $from, (int) $to]);
-        // }
-
-        // 📈 Sorting dinamis
         $sortBy = $request->query('sort_by', 'mahasiswa_id');
         $sortOrder = $request->query('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        // 📄 Pagination
         $perPage = (int) $request->query('per_page', 10);
         $mahasiswa = $query->paginate($perPage);
-        // $mahasiswa = $query->get();
-
 
         return response()->json($mahasiswa, 200);
     }
 
-    public function show(Request $request) {
+    public function show(Request $request)
+    {
         $user = $request->user();
         $mahasiswa_id = optional($user->mahasiswa)->mahasiswa_id;
         $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
@@ -104,51 +86,57 @@ class MahasiswaController extends Controller
             'nama' => ['required', 'string', 'max:255'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'nim.unique' => 'Mahasiswa dengan NIM tersebut telah terdaftar'
+        ];
 
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'title' => 'Validasi Gagal',
+                'message' => collect($validator->errors()->all())->first()
             ], 422);
         }
 
-        $data = $validator->validated();
+        try {
+            $data = $validator->validated();
 
-        // Pecah NIM format: YY/NIU/Fakultas/NIF
-        $nimParts = explode("/", $data['nim']);
-        if (count($nimParts) !== 4) {
+            $nimParts = explode("/", $data['nim']);
+            if (count($nimParts) !== 4) {
+                return response()->json([
+                    'message' => 'Format NIM tidak valid. Gunakan format: YY/NIU/Fakultas/NIF'
+                ], 422);
+            }
+
+            $angkatan = "20" . $nimParts[0];
+            $niu = $nimParts[1];
+            $kodeFakultas = $nimParts[2];
+            $nif = $nimParts[3];
+
+            $user = User::firstOrCreate(
+                ['username' => $niu],
+                [
+                    'email' => null,
+                    'password' => Hash::make($nif),
+                    'role' => 'mahasiswa'
+                ]
+            );
+
+            $data['user_id'] = $user->user_id;
+            $data['angkatan'] = $angkatan;
+
+            $mahasiswa = Mahasiswa::create($data);
+
             return response()->json([
-                'message' => 'Format NIM tidak valid. Gunakan format: YY/NIU/Fakultas/NIF'
-            ], 422);
+                'message' => 'Mahasiswa berhasil ditambahkan.',
+                'data' => $mahasiswa->load(['user', 'magang'])
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $angkatan = "20" . $nimParts[0]; // misal "23" → "2023"
-        $niu = $nimParts[1];
-        $kodeFakultas = $nimParts[2];
-        $nif = $nimParts[3];
-
-        // Buat atau temukan user berdasarkan NIU
-        $user = User::firstOrCreate(
-            ['username' => $niu],
-            [
-                'email' => null,
-                'password' => Hash::make($nif), // password = NIF
-                'role' => 'mahasiswa'
-            ]
-        );
-
-        // Tambahkan user_id dan angkatan ke data mahasiswa
-        $data['user_id'] = $user->user_id;
-        $data['angkatan'] = $angkatan;
-
-        // Buat data mahasiswa
-        $mahasiswa = Mahasiswa::create($data);
-
-        return response()->json([
-            'message' => 'Mahasiswa berhasil dibuat',
-            'data' => $mahasiswa->load(['user', 'magang'])
-        ], 201);
     }
 
 
@@ -157,7 +145,6 @@ class MahasiswaController extends Controller
      */
     public function update(Request $request)
     {
-        // Validasi termasuk mahasiswa_id
         $rules = [
             'mahasiswa_id' => ['required', 'integer', 'exists:mahasiswa,mahasiswa_id'],
             'nim' => ['required', 'string', 'max:50'],
@@ -176,19 +163,23 @@ class MahasiswaController extends Controller
 
         $data = $validator->validated();
 
-        // Cari mahasiswa berdasarkan mahasiswa_id yang dikirim
-        $mahasiswa = Mahasiswa::findOrFail($data['mahasiswa_id']);
-
-        // Hapus mahasiswa_id dari data yang akan diupdate
-        unset($data['mahasiswa_id']);
-
-        // Update data mahasiswa
-        $mahasiswa->update($data);
-
-        return response()->json([
-            'message' => 'Mahasiswa berhasil diperbarui',
-            'data' => $mahasiswa->fresh()->load(['user', 'magang'])
-        ], 200);
+        try {
+            $mahasiswa = Mahasiswa::findOrFail($data['mahasiswa_id']);
+    
+            unset($data['mahasiswa_id']);
+    
+            $mahasiswa->update($data);
+    
+            return response()->json([
+                'message' => 'Mahasiswa berhasil diperbarui',
+                'data' => $mahasiswa->fresh()->load(['user', 'magang'])
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -196,13 +187,20 @@ class MahasiswaController extends Controller
      */
     public function destroy($id)
     {
-        $mahasiswa = Mahasiswa::findOrFail($id);
-
-        $mahasiswa->delete();
-
-        return response()->json([
-            'message' => 'Mahasiswa berhasil dihapus'
-        ], 200);
+        try {
+            $mahasiswa = Mahasiswa::findOrFail($id);
+    
+            $mahasiswa->delete();
+    
+            return response()->json([
+                'message' => 'Mahasiswa berhasil dihapus'
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
 
@@ -220,7 +218,6 @@ class MahasiswaController extends Controller
         $imported = [];
         $lineNumber = 1;
 
-        // MULAI TRANSACTION
         DB::beginTransaction();
 
         try {
@@ -236,6 +233,16 @@ class MahasiswaController extends Controller
 
                 if (empty($nim)) {
                     $errors[] = "Baris ke-{$lineNumber}: NIM tidak boleh kosong";
+                    continue;
+                }
+
+                $e = Mahasiswa::where(function ($query) use ($nim) {
+                    $query->where('nim', '=', $nim);
+                });
+
+                if ($e->exists()) {
+                    $errors[] = "Baris ke-{$lineNumber}: NIM sudah terdaftar";
+                    
                     continue;
                 }
 
@@ -307,7 +314,6 @@ class MahasiswaController extends Controller
 
             fclose($handle);
 
-            // Jika ada error, ROLLBACK (batalkan semua perubahan database)
             if (!empty($errors)) {
                 DB::rollBack();
                 return response()->json([
@@ -318,7 +324,6 @@ class MahasiswaController extends Controller
                 ], 422);
             }
 
-            // Jika tidak ada error, COMMIT (simpan semua perubahan)
             DB::commit();
 
             return response()->json([
@@ -329,7 +334,6 @@ class MahasiswaController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // Jika ada error tidak terduga, rollback juga
             DB::rollBack();
             fclose($handle);
 

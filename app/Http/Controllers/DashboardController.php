@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DokumenMagang;
+use App\Models\Mahasiswa;
 use App\Models\NilaiMitra;
 use Illuminate\Http\Request;
 use App\Models\Magang;
@@ -15,18 +16,16 @@ class DashboardController extends Controller
 {
     public function fetchDashboardDataAdmin()
     {
-        // 1. Hitung jumlah magang aktif berdasarkan tahun ajaran terbaru
-        // $tahunAjaranTerbaru = Magang::latest('tahun_ajaran')->value('tahun_ajaran');
         $SemesterMagangTerbaru = Magang::latest('semester_magang')->value('semester_magang');
-
 
         if ($SemesterMagangTerbaru) {
             $jumlahMagangAktif = Magang::where('semester_magang', $SemesterMagangTerbaru)
-                // ->where('semester_magang', $SemesterMagangTerbaru)
                 ->count();
         } else {
             $jumlahMagangAktif = 0;
         }
+
+        $jumlahMahasiswa = Mahasiswa::count();
 
         // 2. Hitung mitra
         $jumlahMitra = Mitra::count();
@@ -37,6 +36,7 @@ class DashboardController extends Controller
         // Return JSON gabungan
         return response()->json([
             'jumlah_mahasiswa_aktif_magang' => $jumlahMagangAktif,
+            'jumlah_mahasiswa' => $jumlahMahasiswa,
             'jumlah_mitra' => $jumlahMitra,
             'jumlah_dosbing' => $jumlahDosbing,
         ], 200);

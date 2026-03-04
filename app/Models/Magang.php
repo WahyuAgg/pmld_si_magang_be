@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Magang extends Model
 {
@@ -17,7 +18,7 @@ class Magang extends Model
         'mitra_id',
         'supervisor_id',
         'dosbing_id',
-        'semester_magang', 
+        'semester_magang',
         'role_magang',
         'jobdesk',
         'periode_bulan',
@@ -27,12 +28,36 @@ class Magang extends Model
         'created_at',
         'updated_at',
     ];
-    
+
     protected static function booted()
     {
         static::saving(function ($magang) {
             if (!in_array($magang->semester_magang, [6, 7])) {
                 throw new \InvalidArgumentException('Semester magang hanya boleh 6 atau 7.');
+            }
+        });
+
+        static::deleting(function ($magang) {
+            $magang->load(['dokumenMagang', 'laporan', 'penilaianMitra', 'logbook.fotoKegiatan']);
+
+            foreach ($magang->dokumenMagang as $dokumen) {
+                if (Storage::disk('public')->exists($dokumen->file_path)) {
+                    Storage::disk('public')->delete($dokumen->file_path);
+                }
+            }
+
+            if ($magang->laporan?->file_path) {
+                Storage::disk('public')->delete($magang->laporan->file_path);
+            }
+
+            if ($magang->penilaianMitra?->file_path) {
+                Storage::disk('public')->delete($magang->penilaianMitra->file_path);
+            }
+
+            if ($magang->logbook?->fotoKegiatan) {
+                foreach ($magang->logbook->fotoKegiatan as $foto) {
+                    Storage::disk('public')->delete($foto->file_path);
+                }
             }
         });
     }
@@ -53,19 +78,24 @@ class Magang extends Model
         return $this->belongsTo(Dosbing::class, 'dosbing_id', 'dosbing_id');
     }
 
-    public function dokumen()
+    public function dokumenMagang()
     {
         return $this->hasMany(DokumenMagang::class, 'magang_id', 'magang_id');
     }
 
-    public function nilaiMitra()
+    public function penilaianMitra()
     {
         return $this->hasOne(NilaiMitra::class, 'magang_id', 'magang_id');
     }
 
     public function laporan()
     {
-        return $this->hasOne(Laporan::class);
+        return $this->hasOne(Laporan::class, 'magang_id', 'magang_id');
+    }
+
+    public function logbook()
+    {
+        return $this->hasOne(Logbook::class, 'magang_id');
     }
 
 

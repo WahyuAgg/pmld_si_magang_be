@@ -51,31 +51,37 @@ class JadwalPresentasiController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            // 'magang_id' => ['required', 'exists:magang,magang_id'],
             'tanggal_presentasi' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'waktu_selesai' => ['required', 'date_format:H:i', 'after:waktu_mulai'],
             'ruangan' => ['required', 'string', 'max:100'],
-
-            'tempat' => ['nullable', 'string', 'max:150'],
-            'keterangan' => ['nullable', 'string'],
-            'status' => ['nullable', 'string', 'in:terjadwal,selesai,dibatalkan'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'waktu_selesai.after' => 'Waktu mulai tidak dapat melebihi waktu akhir'
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
+                'title' => 'Validasi gagal',
+                'message' => collect($validator->errors()->all())->first(),
             ], 422);
         }
 
-        $jadwal = JadwalPresentasi::create($validator->validated());
-
-        return response()->json([
-            'message' => 'Jadwal presentasi berhasil dibuat',
-            'data' => $jadwal,
-        ], 201);
+        try {
+            $jadwal = JadwalPresentasi::create($validator->validated());
+    
+            return response()->json([
+                'message' => 'Jadwal presentasi berhasil dibuat',
+                'data' => $jadwal,
+            ], 201);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -83,33 +89,39 @@ class JadwalPresentasiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $jadwal = JadwalPresentasi::findOrFail($id);
-
         $rules = [
             'tanggal_presentasi' => ['sometimes', 'required', 'date'],
             'waktu_mulai' => ['sometimes', 'required', 'date_format:H:i'],
             'waktu_selesai' => ['sometimes', 'required', 'date_format:H:i', 'after:waktu_mulai'],
             'ruangan' => ['required', 'string', 'max:100'],
-
-            'tempat' => ['nullable', 'string', 'max:150'],
-            'keterangan' => ['nullable', 'string'],
-            'status' => ['nullable', 'string', 'in:terjadwal,selesai,dibatalkan'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'waktu_selesai.after' => 'Waktu mulai tidak dapat melebihi waktu akhir'
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
+                'title' => 'Validasi gagal',
+                'message' => collect($validator->errors()->all())->first(),
             ], 422);
         }
 
-        $jadwal->update($validator->validated());
-
-        return response()->json([
-            'message' => 'Jadwal presentasi berhasil diperbarui',
-            'data' => $jadwal->fresh(),
-        ], 200);
+        try {
+            $jadwal = JadwalPresentasi::findOrFail($id);
+            $jadwal->update($validator->validated());
+    
+            return response()->json([
+                'message' => 'Jadwal presentasi berhasil diperbarui',
+                'data' => $jadwal->fresh(),
+            ], 200);
+            
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**

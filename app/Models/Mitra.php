@@ -34,4 +34,11 @@ class Mitra extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    public static function booted()
+    {
+        static::deleting(function ($mitra) {
+            $mitra->user()->delete();
+        });
+    }
 }

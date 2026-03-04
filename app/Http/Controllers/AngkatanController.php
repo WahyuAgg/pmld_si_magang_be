@@ -9,12 +9,11 @@ class AngkatanController extends Controller
 {
     public function show()
     {
-        // Dua angkatan terakhir
         $angkatan = Mahasiswa::distinct()
             ->orderBy('angkatan', 'desc')
-            ->take(2)
             ->pluck('angkatan')
-            ->map(fn($a) => (int) $a);
+            ->map(fn($a) => (int) $a)
+            ->values();
 
 
         return response()->json([

@@ -36,4 +36,14 @@ class Mahasiswa extends Model
     {
         return $this->hasMany(Magang::class, 'mahasiswa_id', 'mahasiswa_id');
     }
+
+    public static function booted()
+    {
+        static::deleting(function ($mahasiswa) {
+            $mahasiswa->user()->delete();
+            foreach ($mahasiswa->magang as $magang) { 
+                $magang->delete(); 
+            }
+        });
+    }
 }

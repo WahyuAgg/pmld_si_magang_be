@@ -20,7 +20,7 @@ class DosbingController extends Controller
         $query = Dosbing::query();
 
         // Filter berdasarkan nama
-        if ($search= $request->query('q')) {
+        if ($search = $request->query('q')) {
             $query->where('nama', 'like', "%{$search}%");
         }
 
@@ -45,24 +45,37 @@ class DosbingController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'nip' => ['required', 'string', 'max:30', 'unique:dosen_pembimbing,nip'],
+            'nip' => ['required', 'string', 'numeric', 'digits:18', 'unique:dosen_pembimbing,nip'],
             'nama' => ['required', 'string', 'max:150'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'nip.numeric' => 'NIP harus berupa angka',
+            'nip.digits' => 'NIP harus terdiri dari 18 digit',
+            'nip.unique' => 'Dosen dengan NIP tersebut sudah ada',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
+                'title' => "Validasi Gagal",
+                'message' => collect($validator->errors()->all())->first(),
             ], 422);
         }
 
-        $dosbing = Dosbing::create($validator->validated());
+        try {
+            $dosbing = Dosbing::create($validator->validated());
 
-        return response()->json([
-            'message' => 'Dosen pembimbing berhasil ditambahkan',
-            'data' => $dosbing,
-        ], 201);
+            return response()->json([
+                'message' => 'Dosen pembimbing berhasil ditambahkan',
+                'data' => $dosbing,
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -70,27 +83,40 @@ class DosbingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $dosbing = Dosbing::findOrFail($id);
-
         $rules = [
-            'nip' => ['sometimes', 'required', 'string', 'max:30', 'unique:dosen_pembimbing,nip,' . $dosbing->dosbing_id . ',dosbing_id'],
-            'nama' => ['sometimes', 'required', 'string', 'max:150'],
+            'nip' => ['required', 'string', 'numeric', 'digits:18', 'unique:dosen_pembimbing,nip,' . $id . ',dosbing_id'],
+            'nama' => ['required', 'string', 'max:150'],
         ];
 
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
+        $messages = [
+            'nip.numeric' => 'NIP harus berupa angka',
+            'nip.digits' => 'NIP harus terdiri dari 18 digit',
+            'nip.unique' => 'Dosen dengan NIP tersebut sudah ada',
+        ];
+
+        try {
+            $dosbing = Dosbing::findOrFail($id);
+            $validator = Validator::make($request->all(), $rules, $messages);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'title' => "Validasi Gagal",
+                    'message' => collect($validator->errors()->all())->first(),
+                ], 422);
+            }
+    
+            $dosbing->update($validator->validated());
+    
             return response()->json([
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
-            ], 422);
+                'message' => 'Dosen pembimbing berhasil diperbarui',
+                'data' => $dosbing->fresh(),
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
         }
-
-        $dosbing->update($validator->validated());
-
-        return response()->json([
-            'message' => 'Dosen pembimbing berhasil diperbarui',
-            'data' => $dosbing->fresh(),
-        ], 200);
     }
 
     /**
@@ -106,7 +132,8 @@ class DosbingController extends Controller
         ], 200);
     }
 
-    public function getDosbingByMagangId($id){
+    public function getDosbingByMagangId($id)
+    {
         $magang = Magang::where('magang_id', $id)->first();
         $dosbingId = $magang->dosbing_id;
         $dosbing = Dosbing::where('dosbing_id', $dosbingId)->first();
