@@ -114,6 +114,7 @@ Route::prefix('magang')
         Route::post('/', 'store');
         Route::get('/{id}', 'show');
         Route::get('/{id}/detail', 'showDetail');
+        Route::post('/{id}', 'update');
         Route::put('/{id}', 'update');
         Route::delete('/{id}', 'destroy');
     });

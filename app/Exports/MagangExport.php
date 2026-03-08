@@ -86,7 +86,7 @@ class MagangExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
         // Foto logbook
         $fotoUrls = [];
-        $logbook = $magang->logbook->first();
+        $logbook = $magang->logbook?->first();
         if ($logbook && $logbook->fotoKegiatan && $logbook->fotoKegiatan->count() > 0) {
             foreach ($logbook->fotoKegiatan->take(5) as $foto) {
                 $fotoUrls[] = $foto->file_path ? $baseUrl . $foto->file_path : '-';
@@ -97,7 +97,7 @@ class MagangExport implements FromCollection, WithHeadings, WithMapping, WithSty
         }
 
         $penilaian = $magang->penilaianMitra;
-        $laporan = $magang->laporan->first();
+        $laporan = $magang->laporan?->first();
 
         return array_merge([
             $this->row++,

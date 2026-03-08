@@ -24,7 +24,7 @@ class MitraController extends Controller
         // Pencarian: nama_mitra
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama_mitra', 'like', "%{$search}%");
+                $q->where('nama_mitra', 'ilike', "%{$search}%");
             });
         }
 

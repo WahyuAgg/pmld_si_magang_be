@@ -33,7 +33,7 @@ class MagangController extends Controller
         // Filter otomatis jika role adalah mahasiswmahasiswaIda
         if ($user->role === 'mahasiswa') {
             // asumsikan user.id terhubung ke mahasiswa.id atau ke field user_id di tabel mahasiswa
-            $query->where('mahasiswa_id', $mahasiswa->mahasiswa_id);
+            $query->where('mahasiswa_id', $mahasiswa->mahasiswa_id)->orderBy("created_at");
         }
 
         // 🔎 Filter manual berdasarkan query param (admin bisa gunakan ini)
@@ -101,20 +101,32 @@ class MagangController extends Controller
      */
     public function store(Request $request)
     {
-        // Ambil mahasiswa_id dari user yang sedang login
         $user = $request->user();
         $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
 
-        $rules = [
-            'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
-            'dosbing_id' => ['nullable'],
-            'semester_magang' => ['sometimes', 'integer', Rule::in([6, 7])],
-            'role_magang' => ['nullable', 'string', 'max:100'],
-            'jobdesk' => ['nullable', 'string'],
-            'periode_bulan' => ['nullable', 'integer', 'min:1'],
-            'dokumenPenerimaan' => 'required|file|mimes:pdf|max:5120',
-            'dokumenPraKRS' => 'required|file|mimes:pdf|max:5120'
-        ];
+       $rules = [
+        'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
+        'dosbing_id' => ['nullable'],
+        'semester_magang' => [
+            'sometimes',
+            'integer',
+            Rule::in([6, 7]),
+            function ($attribute, $value, $fail) use ($mahasiswa_id) {
+                $hasMagang = Magang::where('mahasiswa_id', $mahasiswa_id)
+                    ->where('semester_magang', $value)
+                    ->exists();
+
+                if ($hasMagang) {
+                    $fail("Magang untuk semester {$value} sudah pernah didaftarkan.");
+                }
+            },
+        ],
+        'role_magang' => ['nullable', 'string', 'max:100'],
+        'jobdesk' => ['nullable', 'string'],
+        'periode_bulan' => ['nullable', 'integer', 'min:1'],
+        'dokumenPenerimaan' => 'required|file|mimes:pdf|max:5120',
+        'dokumenPraKRS' => 'required|file|mimes:pdf|max:5120'
+    ];
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -162,8 +174,6 @@ class MagangController extends Controller
             'nama_file' => $namaPraKRS,
             'ukuran_file' => $filePraKrs->getSize()
         ]);
-
-
 
         return response()->json([
             'message' => 'Data magang berhasil dibuat',
@@ -218,7 +228,7 @@ class MagangController extends Controller
 
             $magang->dokumenMagang()
                 ->updateOrCreate(
-                    ['jenis_dokumen' => 'penerimaan'],
+                    ['jenis_dokumen' => 'doc_surat_penerimaan'],
                     [
                         'file_path' => $path,
                         'nama_file' => $file->getClientOriginalName()
@@ -234,7 +244,7 @@ class MagangController extends Controller
 
             $magang->dokumenMagang()
                 ->updateOrCreate(
-                    ['jenis_dokumen' => 'pra_krs'],
+                    ['jenis_dokumen' => 'doc_pra_krs'],
                     [
                         'file_path' => $path,
                         'nama_file' => $file->getClientOriginalName()

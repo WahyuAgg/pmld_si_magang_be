@@ -21,7 +21,7 @@ class DosbingController extends Controller
 
         // Filter berdasarkan nama
         if ($search = $request->query('q')) {
-            $query->where('nama', 'like', "%{$search}%");
+            $query->where('nama', 'ilike', "%{$search}%");
         }
 
         $perPage = (int) $request->query('per_page', 15);

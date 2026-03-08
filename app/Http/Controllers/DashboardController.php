@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DokumenMagang;
+use App\Models\Laporan;
 use App\Models\Mahasiswa;
 use App\Models\NilaiMitra;
 use Illuminate\Http\Request;
@@ -103,7 +104,8 @@ class DashboardController extends Controller
             $hasSuratTerima = DokumenMagang::where('magang_id', $magang2->magang_id)->where('jenis_dokumen', 'doc_surat_penerimaan')->exists();
             $hasLogbook = Logbook::where('magang_id', $magang2->magang_id)->exists();
             // Asumsi laporan akhir juga ada di tabel dokumen
-            $hasLaporan = DokumenMagang::where('magang_id', $magang2->magang_id)->where('jenis_dokumen', 'doc_laporan_magang')->exists();
+            // $hasLaporan = DokumenMagang::where('magang_id', $magang2->magang_id)->where('jenis_dokumen', 'doc_laporan_magang')->exists();
+            $hasLaporan = Laporan::where('magang_id', $magang2->magang_id)->exists();
 
             // Hitung Skor Persiapan
 
@@ -126,7 +128,8 @@ class DashboardController extends Controller
             $hasSuratTerima = DokumenMagang::where('magang_id', $magang1->magang_id)->where('jenis_dokumen', 'doc_surat_penerimaan')->exists();
             $hasLogbook = Logbook::where('magang_id', $magang1->magang_id)->exists();
             // Asumsi laporan akhir juga ada di tabel dokumen
-            $hasLaporan = DokumenMagang::where('magang_id', $magang1->magang_id)->where('jenis_dokumen', 'doc_laporan_magang')->exists();
+            // $hasLaporan = DokumenMagang::where('magang_id', $magang1->magang_id)->where('jenis_dokumen', 'doc_laporan_magang')->exists();
+            $hasLaporan = Laporan::where('magang_id', $magang1->magang_id)->exists();
 
             // Hitung Skor Persiapan
             if ($hasPraKrs) $data['persiapan_magang'] += 50;

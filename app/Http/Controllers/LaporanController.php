@@ -15,11 +15,11 @@ class LaporanController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user(); 
+        $user = $request->user();
         $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
 
         $laporan = Laporan::with('magang')
-            ->whereHas('magang', function ($q) use ($mahasiswa_id){
+            ->whereHas('magang', function ($q) use ($mahasiswa_id) {
                 $q->where('mahasiswa_id', $mahasiswa_id);
             })
             ->get();
@@ -42,7 +42,7 @@ class LaporanController extends Controller
     {
         $rules = [
             'magang_id' => 'required|exists:magang,magang_id',
-            'file'      => 'required|file|mimes:pdf|max:5048',
+            'file' => 'required|file|mimes:pdf|max:5048',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -65,11 +65,11 @@ class LaporanController extends Controller
         //     ], 409);
         // }
 
-        $magang_id= $request->magang_id;
-        $file     = $request->file('file');
+        $magang_id = $request->magang_id;
+        $file = $request->file('file');
         $namaFile = $file->getClientOriginalName();
         $fileName = $namaFile . "_" . time();
-        $path     = $file->storeAs("laporan-magang/{$magang_id}", $fileName, 'public');
+        $path = $file->storeAs("laporan-magang/{$magang_id}", $fileName, 'public');
 
         $laporan = Laporan::create([
             'magang_id' => $magang_id,
@@ -79,7 +79,7 @@ class LaporanController extends Controller
 
         return response()->json([
             'message' => 'Laporan magang berhasil diunggah',
-            'data'    => $laporan
+            'data' => $laporan
         ], 201);
     }
 
@@ -90,7 +90,7 @@ class LaporanController extends Controller
     {
         $laporan = Laporan::whereHas('magang', function ($q) use ($magangId) {
             $q->where('id', $magangId)
-              ->where('mahasiswa_id', auth()->id());
+                ->where('mahasiswa_id', auth()->id());
         })->firstOrFail();
 
         return response()->json($laporan);
@@ -107,32 +107,30 @@ class LaporanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $magangId)
+    public function update(Request $request, string $id)
     {
         $request->validate([
             'file' => 'required|file|mimes:pdf|max:5048',
         ]);
 
-        $laporan = Laporan::whereHas('magang', function ($q) use ($magangId) {
-            $q->where('magang_id', $magangId)
-              ->where('mahasiswa_id', auth()->id());
-        })->firstOrFail();
+        $laporan = Laporan::whereHas('magang', function ($q) {
+            $q->where('mahasiswa_id', auth()->id());
+        })->where('laporan_id', $id)->firstOrFail();
 
         // hapus file lama
         Storage::disk('public')->delete($laporan->file_path);
 
-        $file     = $request->file('file');
-        $path     = $file->store('laporan-magang', 'public');
-        $namaFile = $file->getClientOriginalName();
+        $file = $request->file('file');
+        $fileName = $file->getClientOriginalName();
+        $path = $file->storeAs("laporan-magang/{$request->magang_id}", $fileName, 'public');
 
         $laporan->update([
             'file_path' => $path,
-            'nama_file' => $namaFile
+            'nama_file' => $fileName
         ]);
 
         return response()->json([
             'message' => 'Laporan magang berhasil diperbarui',
-            'data'    => $laporan
         ]);
     }
 
@@ -143,7 +141,7 @@ class LaporanController extends Controller
     {
         $laporan = Laporan::whereHas('magang', function ($q) use ($magangId) {
             $q->where('id', $magangId)
-              ->where('mahasiswa_id', auth()->id());
+                ->where('mahasiswa_id', auth()->id());
         })->firstOrFail();
 
         Storage::disk('public')->delete($laporan->file_path);
