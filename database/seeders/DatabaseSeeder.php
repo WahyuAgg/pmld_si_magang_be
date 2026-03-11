@@ -15,16 +15,16 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            MahasiswaSeeder::class,
-            DosbingSeeder::class,
-            MitraSeeder::class,
-            // SupervisorSeeder::class,
-            MagangSeeder::class,
-            DokumenMagangSeeder::class,
-            LogbookSeeder::class,
-            JadwalPresentasiSeeder::class,
-            NilaiMitraSeeder::class,
-            FotoMagangSeeder::class,
+            // MahasiswaSeeder::class,
+            // DosbingSeeder::class,
+            // MitraSeeder::class,
+            // // SupervisorSeeder::class,
+            // MagangSeeder::class,
+            // DokumenMagangSeeder::class,
+            // LogbookSeeder::class,
+            // JadwalPresentasiSeeder::class,
+            // NilaiMitraSeeder::class,
+            // FotoMagangSeeder::class,
         ]);
     }
 }
