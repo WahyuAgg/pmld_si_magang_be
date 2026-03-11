@@ -17,9 +17,9 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_origins' => ['https://fe-pmld-magang.vercel.app'],
 
-    'allowed_origins' => ['*'],
+    'allowed_methods' => ['*'],
 
     'allowed_origins_patterns' => [],
 
