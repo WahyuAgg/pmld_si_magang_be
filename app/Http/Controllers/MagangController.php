@@ -104,29 +104,29 @@ class MagangController extends Controller
         $user = $request->user();
         $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
 
-       $rules = [
-        'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
-        'dosbing_id' => ['nullable'],
-        'semester_magang' => [
-            'sometimes',
-            'integer',
-            Rule::in([6, 7]),
-            function ($attribute, $value, $fail) use ($mahasiswa_id) {
-                $hasMagang = Magang::where('mahasiswa_id', $mahasiswa_id)
-                    ->where('semester_magang', $value)
-                    ->exists();
+        $rules = [
+            'mitra_id' => ['nullable', 'exists:mitra,mitra_id'],
+            'dosbing_id' => ['nullable'],
+            'semester_magang' => [
+                'sometimes',
+                'integer',
+                Rule::in([6, 7]),
+                function ($attribute, $value, $fail) use ($mahasiswa_id) {
+                    $hasMagang = Magang::where('mahasiswa_id', $mahasiswa_id)
+                        ->where('semester_magang', $value)
+                        ->exists();
 
-                if ($hasMagang) {
-                    $fail("Magang untuk semester {$value} sudah pernah didaftarkan.");
-                }
-            },
-        ],
-        'role_magang' => ['nullable', 'string', 'max:100'],
-        'jobdesk' => ['nullable', 'string'],
-        'periode_bulan' => ['nullable', 'integer', 'min:1'],
-        'dokumenPenerimaan' => 'required|file|mimes:pdf|max:5120',
-        'dokumenPraKRS' => 'required|file|mimes:pdf|max:5120'
-    ];
+                    if ($hasMagang) {
+                        $fail("Magang untuk semester {$value} sudah pernah didaftarkan.");
+                    }
+                },
+            ],
+            'role_magang' => ['nullable', 'string', 'max:100'],
+            'jobdesk' => ['nullable', 'string'],
+            'periode_bulan' => ['nullable', 'integer', 'min:1'],
+            'dokumenPenerimaan' => 'required|file|mimes:pdf|max:5120',
+            'dokumenPraKRS' => 'required|file|mimes:pdf|max:5120'
+        ];
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -144,13 +144,17 @@ class MagangController extends Controller
         // upload penerimaan
         $filePenerimaan = $request->file('dokumenPenerimaan');
         $namePenerimaan = $filePenerimaan->getClientOriginalName();
-        $fileNamePenerimaan = $namePenerimaan . "_" . time();
+        $extPenerimaan = $filePenerimaan->getClientOriginalExtension();
+        $basePenerimaan = pathinfo($namePenerimaan, PATHINFO_FILENAME);
+        $fileNamePenerimaan = $basePenerimaan . "_" . time() . "." . $extPenerimaan;
         $pathPenerimaan = $filePenerimaan->storeAs("dokumen-penerimaan/{$mahasiswa_id}", $fileNamePenerimaan, 'public');
 
         // upload pra KRS
         $filePraKrs = $request->file('dokumenPraKRS');
         $namaPraKRS = $filePraKrs->getClientOriginalName();
-        $fileNamePraKRS = $namaPraKRS . "_" . time();
+        $extPraKRS = $filePraKrs->getClientOriginalExtension();
+        $basePraKRS = pathinfo($namaPraKRS, PATHINFO_FILENAME);
+        $fileNamePraKRS = $basePraKRS . "_" . time() . "." . $extPraKRS;
         $pathPraKrs = $filePraKrs->storeAs("dokumen-pra-krs/{$mahasiswa_id}", $fileNamePraKRS, 'public');
 
         // create magang dulu
@@ -196,10 +200,8 @@ class MagangController extends Controller
             'role_magang' => ['nullable', 'string', 'max:100'],
             'jobdesk' => ['nullable', 'string'],
             'periode_bulan' => ['nullable', 'integer', 'min:1'],
-
-            // dokumen opsional saat update
-            'dokumenPenerimaan' => 'sometimes|file|mimes:pdf|max:5048',
-            'dokumenPraKRS' => 'sometimes|file|mimes:pdf|max:5048',
+            'dokumenPenerimaan' => 'sometimes|file|mimes:pdf|max:5120',
+            'dokumenPraKRS' => 'sometimes|file|mimes:pdf|max:5120',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -212,44 +214,58 @@ class MagangController extends Controller
         }
 
         $data = $validator->validated();
+        $mahasiswa_id = $magang->mahasiswa_id;
 
+        $magang->update(collect($data)->except(['dokumenPenerimaan', 'dokumenPraKRS'])->toArray());
 
-        // update magang
-        $magang->update(collect($data)->except([
-            'dokumenPenerimaan',
-            'dokumenPraKRS'
-        ])->toArray());
-
-        // update dokumen
+        // update dokumen penerimaan
         if ($request->hasFile('dokumenPenerimaan')) {
+            $filePenerimaan = $request->file('dokumenPenerimaan');
+            $namePenerimaan = $filePenerimaan->getClientOriginalName();
+            $extPenerimaan = $filePenerimaan->getClientOriginalExtension();
+            $basePenerimaan = pathinfo($namePenerimaan, PATHINFO_FILENAME);
+            $fileNamePenerimaan = $basePenerimaan . "_" . time() . "." . $extPenerimaan;
+            $pathPenerimaan = $filePenerimaan->storeAs("dokumen-penerimaan/{$mahasiswa_id}", $fileNamePenerimaan, 'public');
 
-            $file = $request->file('dokumenPenerimaan');
-            $path = $file->store('dokumen-penerimaan', 'public');
+            $dokumen = $magang->dokumenMagang()->where('jenis_dokumen', 'doc_surat_penerimaan')->first();
 
-            $magang->dokumenMagang()
-                ->updateOrCreate(
-                    ['jenis_dokumen' => 'doc_surat_penerimaan'],
-                    [
-                        'file_path' => $path,
-                        'nama_file' => $file->getClientOriginalName()
-                    ]
-                );
+            if ($dokumen && Storage::disk('public')->exists($dokumen->file_path)) {
+                Storage::disk('public')->delete($dokumen->file_path);
+            }
+
+            $magang->dokumenMagang()->updateOrCreate(
+                ['jenis_dokumen' => 'doc_surat_penerimaan'],
+                [
+                    'file_path' => $pathPenerimaan,
+                    'nama_file' => $namePenerimaan,
+                    'ukuran_file' => $filePenerimaan->getSize()
+                ]
+            );
         }
 
-        // PRA KRS
+        // update dokumen pra KRS
         if ($request->hasFile('dokumenPraKRS')) {
+            $filePraKrs = $request->file('dokumenPraKRS');
+            $namaPraKRS = $filePraKrs->getClientOriginalName();
+            $extPraKRS = $filePraKrs->getClientOriginalExtension();
+            $basePraKRS = pathinfo($namaPraKRS, PATHINFO_FILENAME);
+            $fileNamePraKRS = $basePraKRS . "_" . time() . "." . $extPraKRS;
+            $pathPraKrs = $filePraKrs->storeAs("dokumen-pra-krs/{$mahasiswa_id}", $fileNamePraKRS, 'public');
 
-            $file = $request->file('dokumenPraKRS');
-            $path = $file->store('dokumen-pra-krs', 'public');
+            $dokumen = $magang->dokumenMagang()->where('jenis_dokumen', 'doc_pra_krs')->first();
 
-            $magang->dokumenMagang()
-                ->updateOrCreate(
-                    ['jenis_dokumen' => 'doc_pra_krs'],
-                    [
-                        'file_path' => $path,
-                        'nama_file' => $file->getClientOriginalName()
-                    ]
-                );
+            if ($dokumen && Storage::disk('public')->exists($dokumen->file_path)) {
+                Storage::disk('public')->delete($dokumen->file_path);
+            }
+
+            $magang->dokumenMagang()->updateOrCreate(
+                ['jenis_dokumen' => 'doc_pra_krs'],
+                [
+                    'file_path' => $pathPraKrs,
+                    'nama_file' => $namaPraKRS,
+                    'ukuran_file' => $filePraKrs->getSize()
+                ]
+            );
         }
 
         return response()->json([
@@ -276,11 +292,11 @@ class MagangController extends Controller
                 $magang = Magang::findOrFail($id);
                 $magang->delete();
             });
-    
+
             return response()->json([
                 'message' => 'Data magang berhasil dihapus'
             ], 200);
-            
+
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => $th->getMessage(),

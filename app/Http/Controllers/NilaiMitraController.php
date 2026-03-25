@@ -95,7 +95,9 @@ class NilaiMitraController extends Controller
         $magang_id = $request->magang_id;
         $file = $request->file('file');
         $namaFile = $file->getClientOriginalName();
-        $fileName = $namaFile . "_" . time();
+        $extFile = $file->getClientOriginalExtension();
+        $base = pathinfo($namaFile, PATHINFO_FILENAME);
+        $fileName = $base . "_" . time(). "." . $extFile;
         $path = $file->storeAs("dokumen-penilaian/{$magang_id}", $fileName, 'public');
 
         $data = $validator->validated();
@@ -145,6 +147,7 @@ class NilaiMitraController extends Controller
         }
 
         $data = $validator->validated();
+        $magang_id = $nilaiMitra->magang_id;
 
         // 🔁 Kalau file di-update
         if ($request->hasFile('file')) {
@@ -154,8 +157,12 @@ class NilaiMitraController extends Controller
             }
 
             $file = $request->file('file');
-            $path = $file->store('dokumen-penilaian', 'public');
             $namaFile = $file->getClientOriginalName();
+            $extFile = $file->getClientOriginalExtension();
+            $base = pathinfo($namaFile, PATHINFO_FILENAME);
+            $fileName = $base . "_" . time(). "." . $extFile;
+            $path = $file->storeAs("dokumen-penilaian/{$magang_id}", $fileName, 'public');
+            // $path = $file->store('dokumen-penilaian', 'public');
 
             $data['file_path'] = $path;
             $data['nama_file'] = $namaFile;

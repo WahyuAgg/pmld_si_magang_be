@@ -68,7 +68,9 @@ class LaporanController extends Controller
         $magang_id = $request->magang_id;
         $file = $request->file('file');
         $namaFile = $file->getClientOriginalName();
-        $fileName = $namaFile . "_" . time();
+        $extFile = $file->getClientOriginalExtension();
+        $base = pathinfo($namaFile, PATHINFO_FILENAME);
+        $fileName = $base . "_" . time(). "." . $extFile;
         $path = $file->storeAs("laporan-magang/{$magang_id}", $fileName, 'public');
 
         $laporan = Laporan::create([
@@ -121,7 +123,10 @@ class LaporanController extends Controller
         Storage::disk('public')->delete($laporan->file_path);
 
         $file = $request->file('file');
-        $fileName = $file->getClientOriginalName();
+        $namaFile = $file->getClientOriginalName();
+        $extFile = $file->getClientOriginalExtension();
+        $base = pathinfo($namaFile, PATHINFO_FILENAME);
+        $fileName = $base . "_" . time(). "." . $extFile;
         $path = $file->storeAs("laporan-magang/{$request->magang_id}", $fileName, 'public');
 
         $laporan->update([
