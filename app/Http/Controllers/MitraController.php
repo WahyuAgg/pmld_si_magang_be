@@ -54,13 +54,14 @@ class MitraController extends Controller
     {
         $rules = [
             'nama_mitra' => ['required', 'string', 'max:255', 'unique:mitra,nama_mitra'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:mitra,email'],
             'narahubung' => ['nullable', 'string'],
         ];
 
         $messages = [
             'nama_mitra.unique' => 'Mitra dengan nama tersebut sudah ada',
             'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah pernah dipakai'
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
