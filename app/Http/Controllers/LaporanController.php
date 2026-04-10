@@ -70,7 +70,7 @@ class LaporanController extends Controller
         $namaFile = $file->getClientOriginalName();
         $extFile = $file->getClientOriginalExtension();
         $base = pathinfo($namaFile, PATHINFO_FILENAME);
-        $fileName = $base . "_" . time(). "." . $extFile;
+        $fileName = $base . "_" . time() . "." . $extFile;
         $path = $file->storeAs("laporan-magang/{$magang_id}", $fileName, 'public');
 
         $laporan = Laporan::create([
@@ -115,9 +115,16 @@ class LaporanController extends Controller
             'file' => 'required|file|mimes:pdf|max:5048',
         ]);
 
-        $laporan = Laporan::whereHas('magang', function ($q) {
-            $q->where('mahasiswa_id', auth()->id());
-        })->where('laporan_id', $id)->firstOrFail();
+        $user = $request->user();
+        $mahasiswa_id = $user->mahasiswa->mahasiswa_id;
+
+        $laporan = Laporan::whereHas('magang', function ($q) use ($mahasiswa_id) {
+            $q->where('mahasiswa_id', $mahasiswa_id);
+        })->where('laporan_id', $id)->first();
+
+        if (!$laporan) {
+            return response()->json(['message' => 'Laporan tidak ditemukan'], 500);
+        }
 
         // hapus file lama
         Storage::disk('public')->delete($laporan->file_path);
@@ -126,7 +133,7 @@ class LaporanController extends Controller
         $namaFile = $file->getClientOriginalName();
         $extFile = $file->getClientOriginalExtension();
         $base = pathinfo($namaFile, PATHINFO_FILENAME);
-        $fileName = $base . "_" . time(). "." . $extFile;
+        $fileName = $base . "_" . time() . "." . $extFile;
         $path = $file->storeAs("laporan-magang/{$request->magang_id}", $fileName, 'public');
 
         $laporan->update([
