@@ -64,12 +64,16 @@ class MagangController extends Controller
 
         // 🔎 Filter status penilaian (nilai mitra)
         if ($penilaian = $request->query('penilaian')) {
+            $user = $request->user();
+            $mitra_id = $user->mitra->mitra_id;
             if ($penilaian === 'none') {
                 // Magang yang BELUM ada penilaian mitra
-                $query->whereDoesntHave('penilaianMitra');
+                $query->whereDoesntHave('penilaianMitra')
+                    ->where('mitra_id', $mitra_id);
             } elseif ($penilaian === 'exist') {
                 // Magang yang SUDAH ada penilaian mitra
-                $query->whereHas('penilaianMitra');
+                $query->whereHas('penilaianMitra')
+                    ->where('mitra_id', $mitra_id);
             }
         }
 
