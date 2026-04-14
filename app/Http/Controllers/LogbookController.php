@@ -50,7 +50,13 @@ class LogbookController extends Controller
     public function show($id)
     {
         try {
-            $logbook = Logbook::with('fotoKegiatan')->findOrFail($id);
+            $logbook = Logbook::with(['fotoKegiatan', 'magang'])->where('logbook_id', $id)->first();
+
+
+            if (!$logbook) {
+                return response()->json(['message' => 'Logbook tidak ditemukan'], 500);
+            }
+
 
             return response()->json([
                 'success' => true,
