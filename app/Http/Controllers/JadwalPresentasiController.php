@@ -55,6 +55,7 @@ class JadwalPresentasiController extends Controller
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'waktu_selesai' => ['required', 'date_format:H:i', 'after:waktu_mulai'],
             'ruangan' => ['required', 'string', 'max:100'],
+            'keterangan' => ['string']
         ];
 
         $messages = [
@@ -94,6 +95,7 @@ class JadwalPresentasiController extends Controller
             'waktu_mulai' => ['sometimes', 'required', 'date_format:H:i'],
             'waktu_selesai' => ['sometimes', 'required', 'date_format:H:i', 'after:waktu_mulai'],
             'ruangan' => ['required', 'string', 'max:100'],
+            'keterangan' => ['string'],
         ];
 
         $messages = [
