@@ -170,7 +170,7 @@ class MagangController extends Controller
         DokumenMagang::create([
             'magang_id' => $magang->magang_id,
             'jenis_dokumen' => 'doc_surat_penerimaan',
-            'file_path' => $pathPenerimaan,
+            'path_file' => $pathPenerimaan,
             'nama_file' => $namePenerimaan,
             'ukuran_file' => $filePenerimaan->getSize()
         ]);
@@ -178,7 +178,7 @@ class MagangController extends Controller
         DokumenMagang::create([
             'magang_id' => $magang->magang_id,
             'jenis_dokumen' => 'doc_pra_krs',
-            'file_path' => $pathPraKrs,
+            'path_file' => $pathPraKrs,
             'nama_file' => $namaPraKRS,
             'ukuran_file' => $filePraKrs->getSize()
         ]);
@@ -233,14 +233,14 @@ class MagangController extends Controller
 
             $dokumen = $magang->dokumenMagang()->where('jenis_dokumen', 'doc_surat_penerimaan')->first();
 
-            if ($dokumen && Storage::disk('public')->exists($dokumen->file_path)) {
-                Storage::disk('public')->delete($dokumen->file_path);
+            if ($dokumen && Storage::disk('public')->exists($dokumen->path_file)) {
+                Storage::disk('public')->delete($dokumen->path_file);
             }
 
             $magang->dokumenMagang()->updateOrCreate(
                 ['jenis_dokumen' => 'doc_surat_penerimaan'],
                 [
-                    'file_path' => $pathPenerimaan,
+                    'path_file' => $pathPenerimaan,
                     'nama_file' => $namePenerimaan,
                     'ukuran_file' => $filePenerimaan->getSize()
                 ]
@@ -258,14 +258,14 @@ class MagangController extends Controller
 
             $dokumen = $magang->dokumenMagang()->where('jenis_dokumen', 'doc_pra_krs')->first();
 
-            if ($dokumen && Storage::disk('public')->exists($dokumen->file_path)) {
-                Storage::disk('public')->delete($dokumen->file_path);
+            if ($dokumen && Storage::disk('public')->exists($dokumen->path_file)) {
+                Storage::disk('public')->delete($dokumen->path_file);
             }
 
             $magang->dokumenMagang()->updateOrCreate(
                 ['jenis_dokumen' => 'doc_pra_krs'],
                 [
-                    'file_path' => $pathPraKrs,
+                    'path_file' => $pathPraKrs,
                     'nama_file' => $namaPraKRS,
                     'ukuran_file' => $filePraKrs->getSize()
                 ]
