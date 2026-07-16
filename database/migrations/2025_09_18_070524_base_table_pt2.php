@@ -34,12 +34,10 @@ return new class extends Migration {
         Schema::create('dokumen_magang', function (Blueprint $table) {
             $table->id('dokumen_id');
             $table->unsignedBigInteger('magang_id');
-            $table->enum('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra']);
+            $table->enum('jenis_dokumen', ['doc_surat_penerimaan', 'doc_pra_krs']);
             $table->string('nama_file', 255);
-            $table->string('path_file', 500);
+            $table->string('file_path', 500);
             $table->bigInteger('ukuran_file')->nullable();
-            $table->enum('status_dokumen', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
-            $table->text('keterangan')->nullable();
             $table->timestamp('uploaded_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
@@ -97,9 +95,8 @@ return new class extends Migration {
             $table->id('foto_id');
             $table->unsignedBigInteger('logbook_id');
             $table->string('nama_file', 255);
-            $table->string('path_file', 500);
-            $table->string('keterangan', 255)->nullable();
-            $table->timestamp('uploaded_at')->useCurrent();
+            $table->string('file_path', 500);
+            $table->timestamps();
 
             $table->foreign('logbook_id')->references('logbook_id')->on('logbook')->onDelete('cascade');
         });

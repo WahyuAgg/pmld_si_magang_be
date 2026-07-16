@@ -14,7 +14,7 @@ class DokumenMagang extends Model
         'magang_id',
         'jenis_dokumen', //['doc_surat_penerimaan', 'doc_pra_krs', 'doc_laporan_magang', 'doc_penilaian_mitra']
         'nama_file',
-        'path_file',
+        'file_path',
         'ukuran_file',
         'uploaded_at',
         'updated_at',

@@ -12,7 +12,7 @@ class FotoMagang extends Model
     protected $fillable = [
         'logbook_id',
         'nama_file',
-        'path_file',
+        'file_path',
         'keterangan',
     ];
     protected $hidden = [

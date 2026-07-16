@@ -69,15 +69,10 @@ return new class extends Migration {
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('mitra_id')->nullable();
             $table->unsignedBigInteger('dosbing_id')->nullable();
-            $table->year('tahun_ajaran');
             $table->integer('semester_magang');
-            $table->integer('jumlah_magang_ke')->default(1);
             $table->string('role_magang', 100)->nullable();
             $table->text('jobdesk')->nullable();
-            $table->date('tanggal_mulai')->nullable();
-            $table->date('tanggal_selesai')->nullable();
             $table->integer('periode_bulan')->default(5);
-            $table->enum('status_magang', ['draft', 'berlangsung', 'selesai', 'ditolak'])->default('draft');
             $table->timestamps();
 
             $table->foreign('mahasiswa_id')
