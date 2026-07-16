@@ -120,7 +120,7 @@ class LogbookController extends Controller
                     FotoMagang::create([
                         'logbook_id' => $logbook->logbook_id,
                         'nama_file' => $namaFileAsli,
-                        'file_path' => $path,
+                        'path_file' => $path,
                     ]);
                 }
             }
@@ -188,8 +188,8 @@ class LogbookController extends Controller
 
                 foreach ($fotosToDelete as $foto) {
                     // Hapus file fisik
-                    if (Storage::disk('public')->exists($foto->file_path)) {
-                        Storage::disk('public')->delete($foto->file_path);
+                    if (Storage::disk('public')->exists($foto->path_file)) {
+                        Storage::disk('public')->delete($foto->path_file);
                     }
                 }
 
@@ -230,7 +230,7 @@ class LogbookController extends Controller
                     FotoMagang::create([
                         'logbook_id' => $logbook->logbook_id,
                         'nama_file' => $namaFileAsli,
-                        'file_path' => $path,
+                        'path_file' => $path,
                     ]);
                 }
             }
@@ -266,8 +266,8 @@ class LogbookController extends Controller
             $fotoKegiatan = FotoMagang::where('logbook_id', $logbook_id)->get();
 
             foreach ($fotoKegiatan as $foto) {
-                if (Storage::disk('public')->exists($foto->file_path)) {
-                    Storage::disk('public')->delete($foto->file_path);
+                if (Storage::disk('public')->exists($foto->path_file)) {
+                    Storage::disk('public')->delete($foto->path_file);
                 }
             }
 

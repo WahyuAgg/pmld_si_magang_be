@@ -89,7 +89,7 @@ class MagangExport implements FromCollection, WithHeadings, WithMapping, WithSty
         $logbook = $magang->logbook?->first();
         if ($logbook && $logbook->fotoKegiatan && $logbook->fotoKegiatan->count() > 0) {
             foreach ($logbook->fotoKegiatan->take(5) as $foto) {
-                $fotoUrls[] = $foto->file_path ? $baseUrl . $foto->file_path : '-';
+                $fotoUrls[] = $foto->path_file ? $baseUrl . $foto->path_file : '-';
             }
         }
         while (count($fotoUrls) < 5) {
@@ -105,8 +105,8 @@ class MagangExport implements FromCollection, WithHeadings, WithMapping, WithSty
             $magang->mahasiswa?->nim ?? '-',
             $magang->mitra?->nama_mitra ?? '-',
             $magang->dosenPembimbing?->nama ?? '-',
-            $dokPenerimaan?->file_path ? $baseUrl . $dokPenerimaan->file_path : '-',
-            $dokPraKRS?->file_path ? $baseUrl . $dokPraKRS->file_path : '-',
+            $dokPenerimaan?->path_file ? $baseUrl . $dokPenerimaan->path_file : '-',
+            $dokPraKRS?->path_file ? $baseUrl . $dokPraKRS->path_file : '-',
         ], $fotoUrls, [
             $penilaian?->nilai_teknis ?? '-',
             $penilaian?->nilai_profesionalisme_etika ?? '-',

@@ -58,7 +58,7 @@ class DokumenMagangSeeder extends Seeder
                     'magang_id'       => $magang->magang_id,
                     'jenis_dokumen'   => $type,
                     'nama_file'       => $namaFile,
-                    'file_path'       => '/storage/dokumen_magang/' . $namaFile,
+                    'path_file'       => '/storage/dokumen_magang/' . $namaFile,
                     'ukuran_file'     => Storage::exists($destFile) ? Storage::size($destFile) : rand(100, 1024) * 1024,
                     'uploaded_at'     => now(),
                     'updated_at'      => now(),
