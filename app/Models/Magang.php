@@ -19,9 +19,14 @@ class Magang extends Model
         'supervisor_id',
         'dosbing_id',
         'semester_magang',
+        'tahun_ajaran',
         'role_magang',
         'jobdesk',
         'periode_bulan',
+        'jumlah_magang_ke',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'status_magang',
     ];
 
     protected $hidden = [
@@ -31,6 +36,21 @@ class Magang extends Model
 
     protected static function booted()
     {
+        static::creating(function ($magang) {
+            if (!$magang->tahun_ajaran) {
+                $mahasiswa = $magang->mahasiswa;
+                if (!$mahasiswa && $magang->mahasiswa_id) {
+                    $mahasiswa = \App\Models\Mahasiswa::find($magang->mahasiswa_id);
+                }
+
+                if ($mahasiswa && $mahasiswa->angkatan) {
+                    $magang->tahun_ajaran = (int) $mahasiswa->angkatan + 3;
+                } else {
+                    $magang->tahun_ajaran = (int) date('Y');
+                }
+            }
+        });
+
         static::saving(function ($magang) {
             if (!in_array($magang->semester_magang, [6, 7])) {
                 throw new \InvalidArgumentException('Semester magang hanya boleh 6 atau 7.');

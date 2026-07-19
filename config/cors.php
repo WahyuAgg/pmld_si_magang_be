@@ -17,7 +17,10 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_origins' => ['https://fe-pmld-magang.vercel.app'],
+    'allowed_origins' => [
+        'http://localhost:8081',
+        'https://fe-pmld-magang.vercel.app',
+    ],
 
     'allowed_methods' => ['*'],
 
