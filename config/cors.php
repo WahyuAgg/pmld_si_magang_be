@@ -17,10 +17,9 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_origins' => [
-        'http://localhost:8081',
-        'https://fe-pmld-magang.vercel.app',
-    ],
+    'allowed_origins' => array_filter(
+        array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', '')))
+    ),
 
     'allowed_methods' => ['*'],
 
