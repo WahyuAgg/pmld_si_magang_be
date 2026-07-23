@@ -1,0 +1,59 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to vps-trpl
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_TRPL_SSH_KEY }}" > ~/.ssh/vps_trpl
+          chmod 600 ~/.ssh/vps_trpl
+          printf '%s\n' "${{ secrets.VPS_TRPL_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Deploy Laravel app
+        env:
+          VPS_HOST: ${{ secrets.VPS_TRPL_HOST }}
+          VPS_USER: ${{ secrets.VPS_TRPL_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/vps_trpl "$VPS_USER@$VPS_HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /var/www/html/pmld-magang-be
+
+          git fetch origin main
+          git pull --ff-only origin main
+
+          composer install \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --optimize-autoloader
+
+          php artisan migrate --force
+          php artisan optimize:clear
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan storage:link || true
+
+          chown -R www-data:www-data storage bootstrap/cache
+          REMOTE
+
