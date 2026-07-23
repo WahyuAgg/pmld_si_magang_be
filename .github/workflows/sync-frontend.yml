@@ -1,0 +1,93 @@
+name: Sync Frontend
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync Vercel build to vps-trpl
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      FRONTEND_SOURCE_URL: https://fe-pmld-magang.vercel.app
+
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_TRPL_SSH_KEY }}" > ~/.ssh/vps_trpl
+          chmod 600 ~/.ssh/vps_trpl
+          printf '%s\n' "${{ secrets.VPS_TRPL_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Download frontend build
+        run: |
+          set -euo pipefail
+          rm -rf frontend-build
+          mkdir -p frontend-build
+          cd frontend-build
+
+          curl -fsSL "$FRONTEND_SOURCE_URL/" -o index.html
+
+          grep -oE '(src|href)="/[^"]+"' index.html \
+            | sed -E 's/^(src|href)="//; s/"$//' \
+            | sort -u \
+            | while read -r path; do
+                mkdir -p ".$(dirname "$path")"
+                curl -fsSL "$FRONTEND_SOURCE_URL$path" -o ".$path"
+              done
+
+          grep -rhoE 'img/[A-Za-z0-9._-]+\.(png|webp|jpg|jpeg|svg|gif)' js 2>/dev/null \
+            | sort -u \
+            | while read -r path; do
+                mkdir -p "$(dirname "$path")"
+                curl -fsSL "$FRONTEND_SOURCE_URL/$path" -o "$path" || true
+              done
+
+          tar -czf ../frontend-build.tgz .
+
+      - name: Deploy frontend build
+        env:
+          VPS_HOST: ${{ secrets.VPS_TRPL_HOST }}
+          VPS_USER: ${{ secrets.VPS_TRPL_USER }}
+        run: |
+          set -euo pipefail
+          scp \
+            -i ~/.ssh/vps_trpl \
+            -o BatchMode=yes \
+            -o ConnectTimeout=20 \
+            -o StrictHostKeyChecking=yes \
+            frontend-build.tgz "$VPS_USER@$VPS_HOST:/tmp/simagang-frontend-build.tgz"
+
+          ssh \
+            -i ~/.ssh/vps_trpl \
+            -o BatchMode=yes \
+            -o ConnectTimeout=20 \
+            -o ServerAliveInterval=15 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" 'bash -se' <<'REMOTE'
+          set -euxo pipefail
+          work=/tmp/simagang-frontend-build
+          backup=/root/simagang-backups/pmld-magang-fe-$(date +%Y%m%d-%H%M%S).tgz
+
+          rm -rf "$work"
+          mkdir -p "$work" /root/simagang-backups
+          tar -xzf /tmp/simagang-frontend-build.tgz -C "$work"
+
+          [ -f /var/www/html/pmld-magang-fe/particlesjs-config.json ] \
+            && cp /var/www/html/pmld-magang-fe/particlesjs-config.json "$work/particlesjs-config.json"
+
+          tar -C /var/www/html -czf "$backup" pmld-magang-fe
+          rsync -a --delete "$work"/ /var/www/html/pmld-magang-fe/
+          chown -R www-data:www-data /var/www/html/pmld-magang-fe
+          rm -rf "$work" /tmp/simagang-frontend-build.tgz
+          REMOTE
+
