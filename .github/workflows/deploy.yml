@@ -34,8 +34,15 @@ jobs:
           VPS_USER: ${{ secrets.VPS_TRPL_USER }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/vps_trpl "$VPS_USER@$VPS_HOST" 'bash -se' <<'REMOTE'
-          set -euo pipefail
+          ssh \
+            -i ~/.ssh/vps_trpl \
+            -o BatchMode=yes \
+            -o ConnectTimeout=20 \
+            -o ServerAliveInterval=15 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" 'bash -se' <<'REMOTE'
+          set -euxo pipefail
           cd /var/www/html/pmld-magang-be
 
           git fetch origin main
@@ -56,4 +63,3 @@ jobs:
 
           chown -R www-data:www-data storage bootstrap/cache
           REMOTE
-
